@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import Services from "./components/Services";
+import SelectedWork from "./components/SelectedWork";
 import CinematicIntro from "./components/CinematicIntro";
 import TheTavqoLogo from "./components/TheTavqoLogo";
 
@@ -63,198 +65,12 @@ function App() {
         {/* ========================================================= */}
         {/* SERVICES SECTION — Editorial Numbered Showcase             */}
         {/* ========================================================= */}
-        <section id="services" className="py-28 px-6 sm:px-10 max-w-[1320px] mx-auto border-t border-[#9F6D44]/20">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-20">
-            <div>
-              <span className="text-[11px] font-sans font-semibold tracking-[0.22em] uppercase text-[#9F6D44] block mb-3">
-                Disciplines & Services
-              </span>
-              <h2 className="font-serif text-[38px] sm:text-[52px] font-normal tracking-tight text-[#47260E] leading-[1.12]">
-                Thoughtful work.<br />
-                <span className="italic font-light text-[#9F6D44]">Beautifully delivered.</span>
-              </h2>
-            </div>
-            <p className="text-[16px] font-sans text-[#503017]/80 max-w-[460px] leading-relaxed font-light mt-6 md:mt-0">
-              Every engagement is approached as a bespoke commission, harmonizing strategic clarity with tactile material refinement.
-            </p>
-          </div>
-
-          <div className="divide-y divide-[#9F6D44]/25 border-y border-[#9F6D44]/25">
-            {[
-              {
-                num: "01",
-                title: "Bespoke Brand Identity & Direction",
-                desc: "Iconic identity systems, bespoke typographic ligatures, and cohesive brand architectures designed to evoke quiet authority and cultural longevity.",
-                deliverables: ["Visual Identity Systems", "Art & Editorial Direction", "Brand Guidelines & Heritage Books"],
-              },
-              {
-                num: "02",
-                title: "Editorial Digital Experiences",
-                desc: "High-contrast digital flagship spaces built with cinematic pacing, spatial typography, and responsive micro-physics that feel warm and human.",
-                deliverables: ["Flagship Digital Design", "Interactive Web Architecture", "Motion & Spatial Prototypes"],
-              },
-              {
-                num: "03",
-                title: "Tangible & Spatial Brand Expressions",
-                desc: "Extending digital identity into physical realms through fine paper selection, blind debossing, tactile packaging, and spatial signage.",
-                deliverables: ["Luxury Packaging", "Editorial Print & Monographs", "Exhibition & Spatial Collateral"],
-              },
-              {
-                num: "04",
-                title: "Strategic Advisory & Evolution",
-                desc: "Partnering with leadership to deconstruct brand positioning, curate high-value partnerships, and guide evolutionary milestones.",
-                deliverables: ["Positioning & Narrative", "Market Distinction Strategy", "Cultural Alignment"],
-              },
-            ].map((service) => (
-              <div
-                key={service.num}
-                className="group py-12 sm:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start hover:bg-[#F7EFE2]/50 transition-all duration-300 px-4 sm:px-6 rounded-2xl"
-              >
-                <div className="lg:col-span-1">
-                  <span className="font-serif text-[28px] sm:text-[32px] text-[#9F6D44]/70 group-hover:text-[#9F6D44] transition-colors">
-                    {service.num}
-                  </span>
-                </div>
-                <div className="lg:col-span-5">
-                  <h3 className="font-serif text-[26px] sm:text-[34px] font-normal text-[#47260E] group-hover:translate-x-1 transition-transform duration-300 leading-snug">
-                    {service.title}
-                  </h3>
-                </div>
-                <div className="lg:col-span-4">
-                  <p className="text-[15px] font-sans text-[#503017]/85 leading-relaxed font-light mb-4">
-                    {service.desc}
-                  </p>
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {service.deliverables.map((item) => (
-                      <span
-                        key={item}
-                        className="text-[11.5px] font-sans uppercase tracking-[0.08em] px-3 py-1 rounded-full bg-[#F4E9D8]/90 text-[#47260E] border border-[#9F6D44]/20"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="lg:col-span-2 flex justify-start lg:justify-end items-center self-center">
-                  <a
-                    href="#contact"
-                    className="inline-flex items-center gap-2 text-[12px] font-sans font-medium uppercase tracking-[0.14em] text-[#9F6D44] group-hover:text-[#47260E] transition-colors"
-                  >
-                    <span>Inquire</span>
-                    <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <Services />
 
         {/* ========================================================= */}
-        {/* PORTFOLIO / PROJECTS — Asymmetric Editorial Rhythm        */}
+        {/* SELECTED WORK — Premium Forest Sage Editorial Showcase    */}
         {/* ========================================================= */}
-        <section id="projects" className="py-28 px-6 sm:px-10 max-w-[1320px] mx-auto border-t border-[#9F6D44]/20">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16">
-            <div>
-              <span className="text-[11px] font-sans font-semibold tracking-[0.22em] uppercase text-[#9F6D44] block mb-3">
-                Selected Commissions
-              </span>
-              <h2 className="font-serif text-[38px] sm:text-[50px] font-normal tracking-tight text-[#47260E]">
-                Works of Distinction
-              </h2>
-            </div>
-            <span className="text-[13px] font-sans tracking-[0.1em] uppercase text-[#503017]/70 mt-4 md:mt-0">
-              Curated Portfolio 2024 — 2026
-            </span>
-          </div>
-
-          {/* Asymmetric Editorial Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-            {/* Project 1 — Large Hero Card */}
-            <div className="lg:col-span-8 group rounded-3xl bg-[#F7EFE2] border border-[#9F6D44]/25 p-8 sm:p-12 overflow-hidden flex flex-col justify-between min-h-[460px] relative shadow-2xs hover:shadow-md transition-all duration-500">
-              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#9F6D44]/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="relative z-10 flex justify-between items-start mb-16">
-                <span className="text-[12px] font-sans uppercase tracking-[0.16em] text-[#9F6D44] font-medium">
-                  HOSPITALITY & ESTATE
-                </span>
-                <span className="text-[13px] font-serif italic text-[#503017]/70">2025</span>
-              </div>
-              <div className="relative z-10 max-w-[560px]">
-                <h3 className="font-serif text-[34px] sm:text-[44px] font-normal text-[#47260E] leading-[1.15] mb-4">
-                  Maison d'Hortense
-                </h3>
-                <p className="text-[15px] font-sans text-[#503017]/85 font-light leading-relaxed mb-6">
-                  Complete brand architecture and digital sanctuary for a historic botanical estate in Provence, balancing ancestral heritage with contemporary guest curation.
-                </p>
-                <div className="flex items-center gap-3 text-[12px] font-sans tracking-wide uppercase text-[#503017]">
-                  <span>Visual Identity</span> • <span>Editorial Web</span> • <span>Bespoke Signage</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Project 2 — Complementary Vertical Card */}
-            <div className="lg:col-span-4 group rounded-3xl bg-[#F4E9D8] border border-[#9F6D44]/25 p-8 sm:p-10 flex flex-col justify-between min-h-[460px] relative shadow-2xs hover:shadow-md transition-all duration-500">
-              <div className="flex justify-between items-start mb-16">
-                <span className="text-[12px] font-sans uppercase tracking-[0.16em] text-[#9F6D44] font-medium">
-                  FINE OBJECTS
-                </span>
-                <span className="text-[13px] font-serif italic text-[#503017]/70">2026</span>
-              </div>
-              <div>
-                <h3 className="font-serif text-[28px] sm:text-[34px] font-normal text-[#47260E] leading-snug mb-3">
-                  Atelier Valery
-                </h3>
-                <p className="text-[14px] font-sans text-[#503017]/80 font-light leading-relaxed mb-6">
-                  Tactile digital flagship and monographic catalogue for handcrafted bronze and ceramic objects.
-                </p>
-                <div className="text-[12px] font-sans tracking-wide uppercase text-[#503017]">
-                  <span>Digital Flagship</span> • <span>Art Direction</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Project 3 — Inverted Editorial Rhythm */}
-            <div className="lg:col-span-5 group rounded-3xl bg-[#F4E9D8] border border-[#9F6D44]/25 p-8 sm:p-10 flex flex-col justify-between min-h-[440px] relative shadow-2xs hover:shadow-md transition-all duration-500">
-              <div className="flex justify-between items-start mb-16">
-                <span className="text-[12px] font-sans uppercase tracking-[0.16em] text-[#9F6D44] font-medium">
-                  HIGH PERFUMERY
-                </span>
-                <span className="text-[13px] font-serif italic text-[#503017]/70">2025</span>
-              </div>
-              <div>
-                <h3 className="font-serif text-[30px] sm:text-[36px] font-normal text-[#47260E] leading-snug mb-3">
-                  Botanique Nocturne
-                </h3>
-                <p className="text-[14.5px] font-sans text-[#503017]/80 font-light leading-relaxed mb-6">
-                  Scent narratives, luxury bottle packaging typography, and immersive sensory storytelling for a Paris-based perfumery house.
-                </p>
-                <div className="text-[12px] font-sans tracking-wide uppercase text-[#503017]">
-                  <span>Packaging Architecture</span> • <span>Brand Voice</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Project 4 — Wide Feature */}
-            <div className="lg:col-span-7 group rounded-3xl bg-[#F7EFE2] border border-[#9F6D44]/25 p-8 sm:p-12 flex flex-col justify-between min-h-[440px] relative shadow-2xs hover:shadow-md transition-all duration-500">
-              <div className="flex justify-between items-start mb-16">
-                <span className="text-[12px] font-sans uppercase tracking-[0.16em] text-[#9F6D44] font-medium">
-                  ARCHITECTURAL MONOGRAPH
-                </span>
-                <span className="text-[13px] font-serif italic text-[#503017]/70">2026</span>
-              </div>
-              <div className="max-w-[500px]">
-                <h3 className="font-serif text-[32px] sm:text-[40px] font-normal text-[#47260E] leading-snug mb-3">
-                  Solarium Archive
-                </h3>
-                <p className="text-[15px] font-sans text-[#503017]/85 font-light leading-relaxed mb-6">
-                  A retrospective digital publication celebrating minimalist conservatory architecture, greenhouse botany, and natural light studies.
-                </p>
-                <div className="text-[12px] font-sans tracking-wide uppercase text-[#503017]">
-                  <span>Editorial Design</span> • <span>Archive System</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <SelectedWork />
 
         {/* ========================================================= */}
         {/* ABOUT SECTION — Editorial Storytelling & Purpose           */}
