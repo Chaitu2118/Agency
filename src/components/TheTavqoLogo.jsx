@@ -12,13 +12,20 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
   {
     className = 'w-full h-auto',
     variant = 'full',
+    colorTheme = 'default',
     style = {},
     showAccentLine = true,
     accentLineRef = null,
+    preserveAspectRatio = 'xMinYMid meet',
     ...props
   },
   ref
 ) {
+  const isIvory = colorTheme === 'ivory';
+  const getStemFill = (fill) => (isIvory ? '#FDF7EE' : fill);
+  const getLeafFill = (fill) => (isIvory ? '#DEB788' : fill);
+  const getHlFill = (fill) => (isIvory ? '#FDF7EE' : fill);
+  const getWmFill = (fill) => (isIvory ? '#FDF7EE' : fill);
   if (variant === 'mark') {
     return (
       <svg
@@ -27,6 +34,7 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={className}
+        preserveAspectRatio={preserveAspectRatio}
         style={{
           width: '100%',
           height: 'auto',
@@ -38,13 +46,13 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
       >
         <g id="tavqo-standalone-mark">
           {emblemStems.map((p, i) => (
-            <path key={'s-' + i} d={p.d} fill={p.fill} transform={p.tr} />
+            <path key={'s-' + i} d={p.d} fill={getStemFill(p.fill)} transform={p.tr} />
           ))}
           {emblemLeaves.map((p, i) => (
-            <path key={'l-' + i} d={p.d} fill={p.fill} transform={p.tr} />
+            <path key={'l-' + i} d={p.d} fill={getLeafFill(p.fill)} transform={p.tr} />
           ))}
           {emblemHighlights.map((p, i) => (
-            <path key={'h-' + i} d={p.d} fill={p.fill} transform={p.tr} />
+            <path key={'h-' + i} d={p.d} fill={getHlFill(p.fill)} transform={p.tr} />
           ))}
         </g>
       </svg>
@@ -58,6 +66,7 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      preserveAspectRatio={preserveAspectRatio}
       style={{
         width: '100%',
         height: 'auto',
@@ -82,7 +91,7 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
             <path
               key={'stem-' + i}
               d={p.d}
-              fill={p.fill}
+              fill={getStemFill(p.fill)}
               transform={p.tr}
               className="tavqo-stem-path"
             />
@@ -95,7 +104,7 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
             <path
               key={'leaf-' + i}
               d={p.d}
-              fill={p.fill}
+              fill={getLeafFill(p.fill)}
               transform={p.tr}
               className="tavqo-leaf-path"
             />
@@ -108,7 +117,7 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
             <path
               key={'hl-' + i}
               d={p.d}
-              fill={p.fill}
+              fill={getHlFill(p.fill)}
               transform={p.tr}
               className="tavqo-highlight-path"
             />
@@ -122,7 +131,7 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
           <path
             key={'wm-' + i}
             d={p.d}
-            fill={p.fill}
+            fill={getWmFill(p.fill)}
             transform={p.tr}
             className="tavqo-wordmark-path"
           />

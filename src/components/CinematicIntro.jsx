@@ -214,11 +214,22 @@ export default function CinematicIntro({ onStartReveal, onComplete, forcePlay = 
         const navLogoEl = document.getElementById("tavqo-nav-logo");
         if (navLogoEl && logoWrapper) {
           const navRect = navLogoEl.getBoundingClientRect();
-          const introRect = logoWrapper.getBoundingClientRect();
+          const introRect = logoSvgRef.current
+            ? logoSvgRef.current.getBoundingClientRect()
+            : logoWrapper.getBoundingClientRect();
 
-          const scaleFactor = Math.max(0.2, navRect.width / introRect.width);
+          const scaleFactor =
+            navRect.height > 0 && introRect.height > 0
+              ? navRect.height / introRect.height
+              : Math.max(0.1, navRect.width / introRect.width);
+
+          const actualLogoWidth =
+            navRect.height > 0
+              ? navRect.height * (1983 / 793)
+              : navRect.width;
+
           const deltaX =
-            navRect.left + navRect.width / 2 - (introRect.left + introRect.width / 2);
+            navRect.left + actualLogoWidth / 2 - (introRect.left + introRect.width / 2);
           const deltaY =
             navRect.top + navRect.height / 2 - (introRect.top + introRect.height / 2);
 
@@ -383,11 +394,22 @@ export default function CinematicIntro({ onStartReveal, onComplete, forcePlay = 
         const navLogoEl = document.getElementById("tavqo-nav-logo");
         if (navLogoEl && logoWrapper) {
           const navRect = navLogoEl.getBoundingClientRect();
-          const introRect = logoWrapper.getBoundingClientRect();
+          const introRect = logoSvgRef.current
+            ? logoSvgRef.current.getBoundingClientRect()
+            : logoWrapper.getBoundingClientRect();
 
-          const scaleFactor = Math.max(0.2, navRect.width / introRect.width);
+          const scaleFactor =
+            navRect.height > 0 && introRect.height > 0
+              ? navRect.height / introRect.height
+              : Math.max(0.1, navRect.width / introRect.width);
+
+          const actualLogoWidth =
+            navRect.height > 0
+              ? navRect.height * (1983 / 793)
+              : navRect.width;
+
           const deltaX =
-            navRect.left + navRect.width / 2 - (introRect.left + introRect.width / 2);
+            navRect.left + actualLogoWidth / 2 - (introRect.left + introRect.width / 2);
           const deltaY =
             navRect.top + navRect.height / 2 - (introRect.top + introRect.height / 2);
 

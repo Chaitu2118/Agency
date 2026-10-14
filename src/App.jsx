@@ -490,7 +490,7 @@ function App() {
               <div className="md:col-span-5">
                 <div className="h-10 w-[190px] mb-6">
                   {/* Footer logo in warm cream */}
-                  <TheTavqoLogo className="w-full h-full object-contain brightness-200" />
+                  <TheTavqoLogo colorTheme="ivory" className="w-full h-full object-contain" />
                 </div>
                 <p className="text-[14.5px] font-sans text-[#F7EFE2]/75 max-w-[380px] leading-relaxed font-light mb-8">
                   The Tavqo is a luxury design atelier and digital studio crafting enduring brands, timeless interfaces, and intentional experiences.
