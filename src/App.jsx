@@ -7,9 +7,9 @@ import CinematicIntro from "./components/CinematicIntro";
 import TheTavqoLogo from "./components/TheTavqoLogo";
 
 function App() {
-  const [isHomepageRevealed, setIsHomepageRevealed] = useState(false);
+  const [isHomepageRevealed, setIsHomepageRevealed] = useState(true);
   const [introKey, setIntroKey] = useState(1);
-  const [isIntroRunning, setIsIntroRunning] = useState(true);
+  const [isIntroRunning, setIsIntroRunning] = useState(false);
 
   // Triggered when logo begins transitioning toward navbar
   const handleStartReveal = useCallback(() => {
@@ -30,22 +30,20 @@ function App() {
 
   return (
     <div
-      className={`relative min-h-screen text-[#47260E] overflow-x-hidden transition-colors duration-700 ${
-        isHomepageRevealed ? "bg-[#FDF7EE]" : "bg-[#FDF7EE]"
-      }`}
+      className="relative min-h-screen text-[#F5F4FF] overflow-x-hidden bg-[#050508]"
       style={{
-        backgroundColor: "#FDF7EE",
-        backgroundImage:
-          "radial-gradient(at 0% 0%, rgba(247, 239, 226, 0.7) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(244, 233, 216, 0.5) 0px, transparent 50%), radial-gradient(at 50% 100%, rgba(247, 239, 226, 0.6) 0px, transparent 50%)",
+        backgroundColor: "#050508",
       }}
     >
-      {/* 1. THE TAVQO ORGANIC CINEMATIC BRAND INTRO */}
-      <CinematicIntro
-        key={introKey}
-        forcePlay={true}
-        onStartReveal={handleStartReveal}
-        onComplete={handleIntroComplete}
-      />
+      {/* 1. THE TAVQO ORGANIC CINEMATIC BRAND INTRO (Available on replay) */}
+      {isIntroRunning && (
+        <CinematicIntro
+          key={introKey}
+          forcePlay={true}
+          onStartReveal={handleStartReveal}
+          onComplete={handleIntroComplete}
+        />
+      )}
 
       {/* 2. THE TAVQO EDITORIAL LUXURY NAVBAR */}
       <Navbar
@@ -383,19 +381,6 @@ function App() {
           </div>
         </footer>
       </main>
-
-      {/* FLOATING REPLAY CONTROLLER (Always accessible for easy testing & review) */}
-      {!isIntroRunning && (
-        <button
-          type="button"
-          onClick={handleReplayIntro}
-          title="Replay The Tavqo Organic Logo Intro"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4.5 py-2.5 rounded-full bg-[#47260E] text-[#FDF7EE] text-[12px] font-sans font-medium tracking-[0.12em] uppercase border border-[#9F6D44]/40 shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 animate-fade-slide-down"
-        >
-          <span className="text-[13px]">↺</span>
-          <span>Replay Intro</span>
-        </button>
-      )}
     </div>
   );
 }

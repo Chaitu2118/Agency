@@ -153,24 +153,33 @@ export default function Services() {
     <section
       id="services"
       ref={sectionRef}
-      className="relative py-28 sm:py-36 px-6 sm:px-10 lg:px-14 w-full border-t border-[#DDC6A9]"
-      style={{ backgroundColor: "#F8F0E4" }}
+      className="relative py-28 sm:py-36 px-6 sm:px-10 lg:px-14 w-full border-t border-white/12 overflow-hidden"
+      style={{ backgroundColor: "#08090D" }}
     >
+      {/* Subtle Atmospheric Violet Glow in Background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 right-0 w-[600px] h-[600px] rounded-full blur-[140px] opacity-20"
+        style={{
+          background: "radial-gradient(circle, #8275FF 0%, #17152F 50%, transparent 70%)",
+        }}
+      />
+
       <div className="max-w-[1360px] mx-auto relative z-10">
         {/* ========================================================= */}
         {/* 1. SECTION HEADER                                         */}
         {/* ========================================================= */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16 sm:mb-20 pb-8 sm:pb-12 border-b border-[#DDC6A9]">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16 sm:mb-20 pb-8 sm:pb-12 border-b border-white/12">
           <div className="services-heading-anim max-w-[720px]">
             <div className="services-eyebrow-anim mb-4 sm:mb-5">
-              <span className="text-[11px] font-sans font-semibold tracking-[0.24em] uppercase text-[#89552F]">
+              <span className="text-[11px] font-sans font-semibold tracking-[0.24em] uppercase text-[#8275FF]">
                 TAVQO / SERVICES
               </span>
             </div>
-            <h2 className="font-serif text-[38px] sm:text-[50px] lg:text-[60px] font-normal tracking-[-0.03em] leading-[1.08] text-[#28170E]">
+            <h2 className="font-serif text-[38px] sm:text-[50px] lg:text-[62px] font-normal tracking-[-0.03em] leading-[1.08] text-[#F4F3FA]">
               <div>Thoughtful technology,</div>
               <div>
-                <span className="italic font-light text-[#89552F]">
+                <span className="italic font-light text-[#8275FF]">
                   beautifully engineered.
                 </span>
               </div>
@@ -178,7 +187,7 @@ export default function Services() {
           </div>
 
           <div className="services-desc-anim max-w-[440px] lg:text-left">
-            <p className="text-[15px] sm:text-[16px] font-sans text-[#79675C] font-light leading-[1.7] tracking-[-0.01em]">
+            <p className="text-[15px] sm:text-[16px] font-sans text-[#9696A8] font-light leading-[1.7] tracking-[-0.01em]">
               From websites and mobile applications to intelligent automation and connected systems, we build digital solutions that help businesses grow, work smarter and stand apart.
             </p>
           </div>
@@ -187,14 +196,14 @@ export default function Services() {
         {/* ========================================================= */}
         {/* 2. EDITORIAL ROWS MATCHING REFERENCE DESIGN               */}
         {/* ========================================================= */}
-        <div className="border-t border-[#DDC6A9]">
+        <div className="border-t border-white/12">
           {servicesData.map((service, index) => {
             const isExpanded = expandedIndex === index;
 
             return (
               <div
                 key={service.num}
-                className="services-row-anim border-b border-[#DDC6A9] transition-colors duration-200"
+                className="services-row-anim border-b border-white/12 transition-colors duration-200"
               >
                 {/* Accordion Row Trigger Header Button */}
                 <button
@@ -203,30 +212,30 @@ export default function Services() {
                   aria-controls={`service-panel-${index}`}
                   onClick={() => toggleCard(index)}
                   aria-expanded={isExpanded}
-                  className="w-full text-left py-7 sm:py-9 lg:py-11 flex items-center group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#89552F]"
+                  className="w-full text-left py-7 sm:py-9 lg:py-11 flex items-center group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8275FF]"
                 >
-                  {/* Left Number: Elegant Sloping Italic Serif in #89552F */}
+                  {/* Left Number: Sloping Italic Serif in #8275FF */}
                   <div className="w-16 sm:w-24 md:w-32 lg:w-36 shrink-0 flex items-center justify-start">
-                    <span className="font-serif italic text-[36px] sm:text-[44px] md:text-[52px] lg:text-[58px] font-normal leading-none text-[#89552F] select-none">
+                    <span className="font-serif italic text-[36px] sm:text-[44px] md:text-[52px] lg:text-[58px] font-normal leading-none text-[#8275FF] select-none">
                       {service.num}
                     </span>
                   </div>
 
                   {/* Left Vertical Divider */}
-                  <div className="h-10 sm:h-12 w-[1px] bg-[#DDC6A9] shrink-0 mr-6 sm:mr-10 lg:mr-12" />
+                  <div className="h-10 sm:h-12 w-[1px] bg-white/12 shrink-0 mr-6 sm:mr-10 lg:mr-12" />
 
                   {/* Center Service Title */}
                   <div className="flex-1 min-w-0 pr-4">
-                    <h3 className="font-serif text-[24px] sm:text-[32px] md:text-[40px] lg:text-[46px] font-normal tracking-[-0.025em] text-[#28170E] leading-tight break-words group-hover:text-[#89552F] transition-colors duration-200">
+                    <h3 className="font-serif text-[24px] sm:text-[32px] md:text-[40px] lg:text-[46px] font-normal tracking-[-0.025em] text-[#F4F3FA] leading-tight break-words group-hover:text-[#8275FF] transition-colors duration-200">
                       {service.title}
                     </h3>
                   </div>
 
                   {/* Right Vertical Divider */}
-                  <div className="h-10 sm:h-12 w-[1px] bg-[#DDC6A9] shrink-0 ml-4 mr-6 sm:mr-10 lg:mr-12" />
+                  <div className="h-10 sm:h-12 w-[1px] bg-white/12 shrink-0 ml-4 mr-6 sm:mr-10 lg:mr-12" />
 
-                  {/* Far-Right Naked Bronze Plus / Minus Control */}
-                  <div className="w-8 sm:w-10 shrink-0 flex items-center justify-center text-[#89552F]">
+                  {/* Far-Right Plus / Minus Control */}
+                  <div className="w-8 sm:w-10 shrink-0 flex items-center justify-center text-[#8275FF]">
                     <svg
                       width="20"
                       height="20"
@@ -234,7 +243,6 @@ export default function Services() {
                       fill="none"
                       className="overflow-visible"
                     >
-                      {/* Horizontal stroke: static, crisp, permanent */}
                       <line
                         x1="2"
                         y1="10"
@@ -244,7 +252,6 @@ export default function Services() {
                         strokeWidth="1.5"
                         strokeLinecap="round"
                       />
-                      {/* Vertical stroke: smoothly collapses into horizontal minus */}
                       <line
                         x1="10"
                         y1="2"
@@ -266,7 +273,7 @@ export default function Services() {
                   </div>
                 </button>
 
-                {/* Ultra-Smooth Native CSS Grid Expandable Drawer */}
+                {/* Native CSS Grid Expandable Drawer */}
                 <div
                   id={`service-panel-${index}`}
                   role="region"
@@ -288,7 +295,6 @@ export default function Services() {
                           : "opacity 0.12s ease-out",
                       }}
                     >
-                      {/* Drawer content aligned with the title column */}
                       <div className="flex items-start">
                         {/* Spacer matching left number column */}
                         <div className="w-16 sm:w-24 md:w-32 lg:w-36 shrink-0" />
@@ -298,21 +304,21 @@ export default function Services() {
                         {/* Expanded details container */}
                         <div className="flex-1 min-w-0 pb-9 sm:pb-12 pr-12 sm:pr-24 space-y-6 sm:space-y-7">
                           {/* Supporting Description */}
-                          <p className="text-[15px] sm:text-[16.5px] font-sans text-[#79675C] font-light leading-[1.65] max-w-[680px]">
+                          <p className="text-[15px] sm:text-[16.5px] font-sans text-[#9696A8] font-light leading-[1.65] max-w-[680px]">
                             {service.desc}
                           </p>
 
-                          {/* Minimal Capabilities separated by vertical lines */}
-                          <div className="flex flex-wrap items-center gap-y-2.5 text-[11px] sm:text-[12px] font-sans font-medium uppercase tracking-[0.16em] text-[#79675C]">
+                          {/* Minimal Capabilities */}
+                          <div className="flex flex-wrap items-center gap-y-2.5 text-[11px] sm:text-[12px] font-sans font-medium uppercase tracking-[0.16em] text-[#9696A8]">
                             {service.capabilities.map((cap, capIdx) => (
                               <span key={cap} className="inline-flex items-center">
                                 {capIdx > 0 && (
                                   <span
                                     aria-hidden="true"
-                                    className="mx-3.5 sm:mx-5 h-3.5 w-[1px] bg-[#DDC6A9] select-none"
+                                    className="mx-3.5 sm:mx-5 h-3.5 w-[1px] bg-white/15 select-none"
                                   />
                                 )}
-                                <span className="hover:text-[#28170E] transition-colors">
+                                <span className="hover:text-[#F4F3FA] transition-colors">
                                   {cap}
                                 </span>
                               </span>
@@ -323,7 +329,7 @@ export default function Services() {
                           <div className="pt-1">
                             <a
                               href={service.href}
-                              className="inline-flex items-center gap-2 text-[12px] sm:text-[13px] font-sans font-semibold tracking-[0.16em] uppercase text-[#89552F] hover:text-[#49250F] underline underline-offset-6 decoration-[#DDC6A9] hover:decoration-[#89552F] transition-all"
+                              className="inline-flex items-center gap-2 text-[12px] sm:text-[13px] font-sans font-semibold tracking-[0.16em] uppercase text-[#8275FF] hover:text-[#F4F3FA] underline underline-offset-6 decoration-[#8275FF]/40 hover:decoration-[#8275FF] transition-all"
                             >
                               <span>{service.cta}</span>
                             </a>

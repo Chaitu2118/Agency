@@ -15,6 +15,7 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
     style = {},
     showAccentLine = true,
     accentLineRef = null,
+    theme = 'dark', // 'dark' | 'light'
     ...props
   },
   ref
@@ -82,33 +83,33 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
             <path
               key={'stem-' + i}
               d={p.d}
-              fill={p.fill}
+              fill={theme === 'dark' ? '#8275FF' : p.fill}
               transform={p.tr}
               className="tavqo-stem-path"
             />
           ))}
         </g>
 
-        {/* Tier 2: Warm Bronze Botanical Foliage & Leaves */}
+        {/* Tier 2: Botanical Foliage & Leaves */}
         <g id="tavqo-leaves-group">
           {emblemLeaves.map((p, i) => (
             <path
               key={'leaf-' + i}
               d={p.d}
-              fill={p.fill}
+              fill={theme === 'dark' ? '#A297FF' : p.fill}
               transform={p.tr}
               className="tavqo-leaf-path"
             />
           ))}
         </g>
 
-        {/* Tier 3: Delicate Warm Cream Botanical Accents */}
+        {/* Tier 3: Delicate Botanical Highlights */}
         <g id="tavqo-highlights-group">
           {emblemHighlights.map((p, i) => (
             <path
               key={'hl-' + i}
               d={p.d}
-              fill={p.fill}
+              fill={theme === 'dark' ? '#F4F3FA' : p.fill}
               transform={p.tr}
               className="tavqo-highlight-path"
             />
@@ -122,7 +123,7 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
           <path
             key={'wm-' + i}
             d={p.d}
-            fill={p.fill}
+            fill={theme === 'dark' ? '#F4F3FA' : p.fill}
             transform={p.tr}
             className="tavqo-wordmark-path"
           />
@@ -137,12 +138,12 @@ const TheTavqoLogo = forwardRef(function TheTavqoLogo(
             y1="565"
             x2="1735"
             y2="565"
-            stroke="#9F6D44"
+            stroke={theme === 'dark' ? '#8275FF' : '#9F6D44'}
             strokeWidth="1.2"
             strokeLinecap="round"
             strokeOpacity="0.4"
           />
-          <circle cx="1035" cy="565" r="2.2" fill="#9F6D44" fillOpacity="0.6" />
+          <circle cx="1035" cy="565" r="2.2" fill={theme === 'dark' ? '#8275FF' : '#9F6D44'} fillOpacity="0.6" />
         </g>
       )}
     </svg>
