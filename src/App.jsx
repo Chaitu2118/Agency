@@ -1,15 +1,62 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import Lenis from "lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Services from "./components/Services";
+import AverageIsExpensive from "./components/AverageIsExpensive";
 import SelectedWork from "./components/SelectedWork";
 import CinematicIntro from "./components/CinematicIntro";
 import TheTavqoLogo from "./components/TheTavqoLogo";
+
+gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const [isHomepageRevealed, setIsHomepageRevealed] = useState(true);
   const [introKey, setIntroKey] = useState(1);
   const [isIntroRunning, setIsIntroRunning] = useState(false);
+  const lenisRef = useRef(null);
+
+  // Initialize Lenis smooth scroll and synchronize with GSAP ScrollTrigger
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 1.5,
+    });
+    lenisRef.current = lenis;
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    const updateLenis = (time) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateLenis);
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      gsap.ticker.remove(updateLenis);
+      lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, []);
+
+  // Pause Lenis scrolling during logo intro replay
+  useEffect(() => {
+    if (!lenisRef.current) return;
+    if (isIntroRunning) {
+      lenisRef.current.stop();
+    } else {
+      lenisRef.current.start();
+    }
+  }, [isIntroRunning]);
 
   // Triggered when logo begins transitioning toward navbar
   const handleStartReveal = useCallback(() => {
@@ -64,6 +111,11 @@ function App() {
         {/* SERVICES SECTION — Editorial Numbered Showcase             */}
         {/* ========================================================= */}
         <Services />
+
+        {/* ========================================================= */}
+        {/* AVERAGE IS EXPENSIVE — 71Three Editorial Collage Showcase */}
+        {/* ========================================================= */}
+        <AverageIsExpensive />
 
         {/* ========================================================= */}
         {/* SELECTED WORK — Premium Forest Sage Editorial Showcase    */}

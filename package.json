@@ -17,7 +17,9 @@
     "lucide-react": "^1.57.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-smokey-fluid-cursor": "^2.2.0",
     "shaders": "^4.0.4",
+    "smokey-fluid-cursor": "^2.1.0",
     "tailwindcss": "^4.3.3",
     "three": "^0.186.1"
   },

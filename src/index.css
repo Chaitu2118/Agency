@@ -57,6 +57,12 @@ body {
   font-family: "Manrope", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Hide default OS cursor where custom Aura Cursor is active */
+#hero,
+#hero * {
+  cursor: none !important;
+}
+
 /* Violet Atmosphere Lighting Utilities */
 .violet-glow {
   box-shadow: 0 0 60px -15px rgba(130, 117, 255, 0.35);

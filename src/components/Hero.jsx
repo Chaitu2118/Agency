@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ParticleSphere from "./effects/ParticleSphere";
+import { FlipFadeText } from "@/components/ui/flip-fade-text";
+import AuraCursor from "./effects/AuraCursor";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * TAVQO — Reference-Accurate Cinematic Creative Technology Hero
@@ -19,6 +24,7 @@ import ParticleSphere from "./effects/ParticleSphere";
  */
 export default function Hero({ isRevealed = true }) {
   const heroRef = useRef(null);
+  const sphereWrapperRef = useRef(null);
   const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
 
   // Check prefers-reduced-motion
@@ -31,6 +37,112 @@ export default function Hero({ isRevealed = true }) {
     return () => media.removeEventListener("change", handler);
   }, []);
 
+  // Scroll-driven particle sphere descent from Hero into Services
+  useEffect(() => {
+    const sphereEl = sphereWrapperRef.current;
+    if (!sphereEl) return;
+
+    if (shouldReduceMotion) return;
+
+    const mm = gsap.matchMedia();
+
+    // Desktop & Tablet (> 768px): Smooth center to left transition
+    mm.add("(min-width: 768px)", () => {
+      // 1. Single smooth glide from center (0vw) to left (-30vw)
+      gsap.fromTo(
+        sphereEl,
+        {
+          x: "0vw",
+          y: "0vh",
+          scale: 1.0,
+          opacity: 1,
+        },
+        {
+          x: "-30vw",
+          y: "3.5vh",
+          scale: 0.84,
+          opacity: 1,
+          ease: "power1.inOut",
+          scrollTrigger: {
+            trigger: "#hero",
+            start: "top top",
+            endTrigger: "#services",
+            end: "top top",
+            scrub: 1.2,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+
+      // 2. The sphere stays 100% visible throughout Services, fading smoothly as AverageIsExpensive enters
+      gsap.fromTo(
+        sphereEl,
+        { opacity: 1 },
+        {
+          opacity: 0,
+          scale: 0.5,
+          ease: "power2.in",
+          scrollTrigger: {
+            trigger: "#average-is-expensive",
+            start: "top 80%",
+            end: "top 30%",
+            scrub: 1,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+    });
+
+    // Mobile (< 768px): Smooth scale down
+    mm.add("(max-width: 767px)", () => {
+      gsap.fromTo(
+        sphereEl,
+        {
+          x: "0vw",
+          y: "0vh",
+          scale: 1.0,
+          opacity: 1,
+        },
+        {
+          x: "0vw",
+          y: "0vh",
+          scale: 0.65,
+          opacity: 1,
+          ease: "power1.inOut",
+          scrollTrigger: {
+            trigger: "#hero",
+            start: "top top",
+            endTrigger: "#services",
+            end: "top top",
+            scrub: 1.2,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+
+      gsap.fromTo(
+        sphereEl,
+        { opacity: 1 },
+        {
+          opacity: 0,
+          scale: 0.4,
+          ease: "power1.in",
+          scrollTrigger: {
+            trigger: "#average-is-expensive",
+            start: "top 80%",
+            end: "top 30%",
+            scrub: 1,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+    });
+
+    return () => {
+      mm.revert();
+    };
+  }, [shouldReduceMotion]);
+
   // GSAP One-time Elegant Entrance Sequence (0.8s - 1.2s)
   useEffect(() => {
     if (!isRevealed) return;
@@ -38,7 +150,6 @@ export default function Hero({ isRevealed = true }) {
     if (shouldReduceMotion) {
       gsap.set(
         [
-          ".hero-bg-typo",
           ".hero-headline-wrap",
           ".hero-mission-wrap",
           ".hero-metrics-wrap",
@@ -51,20 +162,13 @@ export default function Hero({ isRevealed = true }) {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      // 1. Background wordmark gently reveals
+      // 1. Central headline enters with subtle upward translation
       tl.fromTo(
-        ".hero-bg-typo",
-        { opacity: 0, scale: 0.98 },
-        { opacity: 1, scale: 1, duration: 1.1 },
-        0.1
+        ".hero-headline-wrap",
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.9 },
+        0.25
       )
-        // 2. Central headline enters with subtle upward translation
-        .fromTo(
-          ".hero-headline-wrap",
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.9 },
-          0.25
-        )
         // 3. Lower-left mission statement and CTA appear
         .fromTo(
           ".hero-mission-wrap",
@@ -88,10 +192,11 @@ export default function Hero({ isRevealed = true }) {
     <section
       id="hero"
       ref={heroRef}
-      className="relative min-h-[100svh] w-full flex flex-col justify-between pt-24 sm:pt-28 pb-8 sm:pb-10 lg:pb-12 px-6 sm:px-10 lg:px-[6.5vw] overflow-hidden select-text"
+      className="relative min-h-[100svh] w-full flex flex-col justify-between pt-24 sm:pt-28 pb-8 sm:pb-10 lg:pb-12 px-6 sm:px-10 lg:px-[6.5vw] overflow-x-clip select-text cursor-none"
       style={{
         backgroundColor: "#050508",
         color: "#F5F4FF",
+        cursor: "none",
       }}
     >
       {/* ========================================================= */}
@@ -163,80 +268,120 @@ export default function Hero({ isRevealed = true }) {
       {/* ========================================================= */}
       <div
         aria-hidden="true"
-        className="hero-bg-typo pointer-events-none absolute top-[44%] -translate-y-1/2 inset-x-0 flex items-center justify-center select-none overflow-hidden z-[2]"
+        className="hero-bg-typo pointer-events-none absolute top-[44%] -translate-y-1/2 inset-x-0 flex items-center justify-center select-none z-[2] px-6 sm:px-8 w-full"
       >
-        <div className="relative flex items-center justify-center select-none w-full max-w-[100vw]">
-          {/* Base Layer: Solid Architectural Indigo-to-Charcoal Gradient Surface */}
-          <span
-            className="font-extrabold tracking-[-0.035em] leading-none uppercase text-[25vw] sm:text-[27vw] lg:text-[28.5vw] block whitespace-nowrap select-none"
-            style={{
+        <div className="relative flex items-center justify-center select-none w-full max-w-full text-center">
+          <FlipFadeText
+            words={["TAVQO"]}
+            letterDuration={0.65}
+            staggerDelay={0.08}
+            className="w-full flex items-center justify-center py-0"
+            textClassName="flex items-center justify-center font-extrabold uppercase select-none leading-none tracking-[-0.035em] whitespace-nowrap text-transparent"
+            letterStyle={{
+              fontSize: "clamp(54px, 17vw, 275px)",
               fontFamily: '"Plus Jakarta Sans", "Manrope", sans-serif',
-              background:
-                "linear-gradient(125deg, #353872 0%, #26295a 18%, #1c1d42 42%, #14142e 70%, #0d0e1c 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              filter: "drop-shadow(0 24px 50px rgba(0, 0, 0, 0.95)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8))",
+              lineHeight: 1,
+              letterSpacing: "-0.035em",
             }}
-          >
-            TAVQO
-          </span>
+            renderChar={(char, index, total) => (
+              <span className="relative inline-block select-none leading-none">
+                {/* Base Layer: Solid Architectural Indigo-to-Charcoal Gradient Surface */}
+                <span
+                  className="block select-none font-extrabold uppercase leading-none"
+                  style={{
+                    fontFamily: '"Plus Jakarta Sans", "Manrope", sans-serif',
+                    fontSize: "inherit",
+                    lineHeight: 1,
+                    letterSpacing: "inherit",
+                    background:
+                      "linear-gradient(125deg, #353872 0%, #26295a 18%, #1c1d42 42%, #14142e 70%, #0d0e1c 100%)",
+                    backgroundSize: `${total * 100}% 100%`,
+                    backgroundPosition: `${(index / Math.max(1, total - 1)) * 100}% 0`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    filter:
+                      "drop-shadow(0 24px 50px rgba(0, 0, 0, 0.95)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8))",
+                  }}
+                >
+                  {char}
+                </span>
 
-          {/* Internal Highlight Layer: Ambient light catching upper letter surfaces */}
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 font-extrabold tracking-[-0.035em] leading-none uppercase text-[25vw] sm:text-[27vw] lg:text-[28.5vw] block whitespace-nowrap select-none pointer-events-none"
-            style={{
-              fontFamily: '"Plus Jakarta Sans", "Manrope", sans-serif',
-              background:
-                "linear-gradient(180deg, rgba(200, 192, 255, 0.28) 0%, rgba(130, 120, 240, 0.12) 22%, transparent 50%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              mixBlendMode: "screen",
-            }}
-          >
-            TAVQO
-          </span>
+                {/* Internal Highlight Layer: Ambient light catching upper letter surfaces */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 block select-none pointer-events-none font-extrabold uppercase leading-none"
+                  style={{
+                    fontFamily: '"Plus Jakarta Sans", "Manrope", sans-serif',
+                    fontSize: "inherit",
+                    lineHeight: 1,
+                    letterSpacing: "inherit",
+                    background:
+                      "linear-gradient(180deg, rgba(200, 192, 255, 0.28) 0%, rgba(130, 120, 240, 0.12) 22%, transparent 50%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    mixBlendMode: "screen",
+                  }}
+                >
+                  {char}
+                </span>
 
-          {/* Directional Illumination: Gentle catchlight from upper-left beam */}
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 font-extrabold tracking-[-0.035em] leading-none uppercase text-[25vw] sm:text-[27vw] lg:text-[28.5vw] block whitespace-nowrap select-none pointer-events-none"
-            style={{
-              fontFamily: '"Plus Jakarta Sans", "Manrope", sans-serif',
-              background:
-                "linear-gradient(120deg, rgba(175, 165, 255, 0.35) 0%, rgba(135, 125, 245, 0.18) 18%, rgba(65, 58, 160, 0.08) 38%, transparent 60%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              mixBlendMode: "screen",
-            }}
-          >
-            TAVQO
-          </span>
+                {/* Directional Illumination: Gentle catchlight from upper-left beam */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 block select-none pointer-events-none font-extrabold uppercase leading-none"
+                  style={{
+                    fontFamily: '"Plus Jakarta Sans", "Manrope", sans-serif',
+                    fontSize: "inherit",
+                    lineHeight: 1,
+                    letterSpacing: "inherit",
+                    background:
+                      "linear-gradient(120deg, rgba(175, 165, 255, 0.35) 0%, rgba(135, 125, 245, 0.18) 18%, rgba(65, 58, 160, 0.08) 38%, transparent 60%)",
+                    backgroundSize: `${total * 100}% 100%`,
+                    backgroundPosition: `${(index / Math.max(1, total - 1)) * 100}% 0`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    mixBlendMode: "screen",
+                  }}
+                >
+                  {char}
+                </span>
 
-          {/* Ultra-Fine Restrained Violet Rim Reflection */}
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 font-extrabold tracking-[-0.035em] leading-none uppercase text-[25vw] sm:text-[27vw] lg:text-[28.5vw] block whitespace-nowrap select-none pointer-events-none"
-            style={{
-              fontFamily: '"Plus Jakarta Sans", "Manrope", sans-serif',
-              WebkitTextStroke: "0.5px rgba(195, 188, 255, 0.10)",
-              WebkitTextFillColor: "transparent",
-              mixBlendMode: "screen",
-            }}
-          >
-            TAVQO
-          </span>
+                {/* Ultra-Fine Restrained Violet Rim Reflection */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 block select-none pointer-events-none font-extrabold uppercase leading-none"
+                  style={{
+                    fontFamily: '"Plus Jakarta Sans", "Manrope", sans-serif',
+                    fontSize: "inherit",
+                    lineHeight: 1,
+                    letterSpacing: "inherit",
+                    WebkitTextStroke: "0.5px rgba(195, 188, 255, 0.10)",
+                    WebkitTextFillColor: "transparent",
+                    mixBlendMode: "screen",
+                  }}
+                >
+                  {char}
+                </span>
+              </span>
+            )}
+          />
         </div>
       </div>
 
       {/* ========================================================= */}
-      {/* 3. CENTRAL VISUAL (SHADERS PARTICLES 3D SPHERE)           */}
+      {/* 3. TRAVELING VISUAL (SHADERS PARTICLES 3D SPHERE)         */}
+      {/* Travels seamlessly from Hero into Services via ScrollTrigger */}
       {/* ========================================================= */}
       <div
-        className="absolute inset-0 z-[3] w-full h-full overflow-hidden flex items-center justify-center pointer-events-none"
+        id="hero-traveling-sphere-wrap"
+        className="fixed inset-0 z-[15] pointer-events-none flex items-center justify-center will-change-transform"
+        aria-hidden="true"
       >
         {/* Particle sphere container: Compact 1:1 ~420px apparent diameter on desktop */}
-        <div className="w-[420px] h-[420px] sm:w-[460px] sm:h-[460px] lg:w-[500px] lg:h-[500px] aspect-square flex items-center justify-center pointer-events-auto transform -translate-y-3 sm:-translate-y-4">
+        <div
+          ref={sphereWrapperRef}
+          className="w-[420px] h-[420px] sm:w-[460px] sm:h-[460px] lg:w-[500px] lg:h-[500px] aspect-square flex items-center justify-center pointer-events-auto will-change-transform"
+        >
           <ParticleSphere
             className="w-full h-full aspect-square"
             count={9500}
@@ -252,6 +397,11 @@ export default function Hero({ isRevealed = true }) {
           />
         </div>
       </div>
+
+      {/* ========================================================= */}
+      {/* 4. AURA CURSOR (LUMINOUS VIOLET LIQUID-SMOKE PLASMA TRAIL) */}
+      {/* ========================================================= */}
+      <AuraCursor containerRef={heroRef} />
 
       {/* ========================================================= */}
       {/* 4. MAIN HEADLINE — THE HERO'S VISUAL ANCHOR               */}
