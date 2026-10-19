@@ -37,18 +37,15 @@ export default function Hero({ isRevealed = true }) {
     return () => media.removeEventListener("change", handler);
   }, []);
 
-  // Scroll-driven particle sphere descent from Hero into Services
+  // Scroll-driven particle sphere fade out as user scrolls out of Hero (confined to Hero, does not enter Services)
   useEffect(() => {
     const sphereEl = sphereWrapperRef.current;
-    if (!sphereEl) return;
+    const heroEl = heroRef.current;
+    if (!sphereEl || !heroEl) return;
 
     if (shouldReduceMotion) return;
 
-    const mm = gsap.matchMedia();
-
-    // Desktop & Tablet (> 768px): Smooth center to left transition
-    mm.add("(min-width: 768px)", () => {
-      // 1. Single smooth glide from center (0vw) to left (-30vw)
+    const ctx = gsap.context(() => {
       gsap.fromTo(
         sphereEl,
         {
@@ -58,88 +55,23 @@ export default function Hero({ isRevealed = true }) {
           opacity: 1,
         },
         {
-          x: "-30vw",
-          y: "3.5vh",
-          scale: 0.84,
-          opacity: 1,
-          ease: "power1.inOut",
+          opacity: 0,
+          scale: 0.8,
+          y: "-6vh",
+          ease: "power1.out",
           scrollTrigger: {
-            trigger: "#hero",
+            trigger: heroEl,
             start: "top top",
-            endTrigger: "#services",
-            end: "top top",
+            end: "bottom 60%",
             scrub: 1.2,
             invalidateOnRefresh: true,
           },
         }
       );
-
-      // 2. The sphere stays 100% visible throughout Services, fading smoothly as AverageIsExpensive enters
-      gsap.fromTo(
-        sphereEl,
-        { opacity: 1 },
-        {
-          opacity: 0,
-          scale: 0.5,
-          ease: "power2.in",
-          scrollTrigger: {
-            trigger: "#average-is-expensive",
-            start: "top 80%",
-            end: "top 30%",
-            scrub: 1,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-    });
-
-    // Mobile (< 768px): Smooth scale down
-    mm.add("(max-width: 767px)", () => {
-      gsap.fromTo(
-        sphereEl,
-        {
-          x: "0vw",
-          y: "0vh",
-          scale: 1.0,
-          opacity: 1,
-        },
-        {
-          x: "0vw",
-          y: "0vh",
-          scale: 0.65,
-          opacity: 1,
-          ease: "power1.inOut",
-          scrollTrigger: {
-            trigger: "#hero",
-            start: "top top",
-            endTrigger: "#services",
-            end: "top top",
-            scrub: 1.2,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-
-      gsap.fromTo(
-        sphereEl,
-        { opacity: 1 },
-        {
-          opacity: 0,
-          scale: 0.4,
-          ease: "power1.in",
-          scrollTrigger: {
-            trigger: "#average-is-expensive",
-            start: "top 80%",
-            end: "top 30%",
-            scrub: 1,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-    });
+    }, heroEl);
 
     return () => {
-      mm.revert();
+      ctx.revert();
     };
   }, [shouldReduceMotion]);
 
@@ -192,11 +124,10 @@ export default function Hero({ isRevealed = true }) {
     <section
       id="hero"
       ref={heroRef}
-      className="relative min-h-[100svh] w-full flex flex-col justify-between pt-24 sm:pt-28 pb-8 sm:pb-10 lg:pb-12 px-6 sm:px-10 lg:px-[6.5vw] overflow-x-clip select-text cursor-none"
+      className="relative min-h-[100svh] w-full flex flex-col justify-between pt-24 sm:pt-28 pb-8 sm:pb-10 lg:pb-12 px-6 sm:px-10 lg:px-[6.5vw] overflow-x-clip select-text"
       style={{
         backgroundColor: "#050508",
         color: "#F5F4FF",
-        cursor: "none",
       }}
     >
       {/* ========================================================= */}
@@ -369,12 +300,12 @@ export default function Hero({ isRevealed = true }) {
       </div>
 
       {/* ========================================================= */}
-      {/* 3. TRAVELING VISUAL (SHADERS PARTICLES 3D SPHERE)         */}
-      {/* Travels seamlessly from Hero into Services via ScrollTrigger */}
+      {/* 3. HERO VISUAL (3D SHADERS PARTICLE SPHERE)               */}
+      {/* Confined to Hero, smoothly fades out on scroll            */}
       {/* ========================================================= */}
       <div
-        id="hero-traveling-sphere-wrap"
-        className="fixed inset-0 z-[15] pointer-events-none flex items-center justify-center will-change-transform"
+        id="hero-sphere-wrap"
+        className="absolute inset-0 z-[5] pointer-events-none flex items-center justify-center will-change-transform"
         aria-hidden="true"
       >
         {/* Particle sphere container: Compact 1:1 ~420px apparent diameter on desktop */}

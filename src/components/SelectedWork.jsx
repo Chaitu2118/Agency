@@ -97,7 +97,7 @@ export default function SelectedWork() {
 
   return (
     <section
-      id="projects"
+      id="work"
       ref={sectionRef}
       className="relative py-28 sm:py-36 px-5 sm:px-8 lg:px-12 w-full overflow-hidden border-t border-white/12"
       style={{
@@ -105,6 +105,7 @@ export default function SelectedWork() {
         color: "#F4F3FA",
       }}
     >
+      <div id="projects" className="absolute -top-24 pointer-events-none" />
       {/* Dynamic Background Lighting & Subtle Violet Fluid Atmosphere */}
       <div
         aria-hidden="true"

@@ -14,35 +14,96 @@ import TheTavqoLogo from "./TheTavqoLogo";
 const navLinks = [
   { label: "Home", href: "#hero" },
   { label: "Services", href: "#services" },
-  { label: "Work", href: "#projects" },
-  { label: "About", href: "#about" },
-  { label: "Process", href: "#process" },
+  { label: "Why TAVQO", href: "#why-tavqo" },
+  { label: "Process", href: "#good-fit" },
   { label: "Contact", href: "#contact" },
 ];
 
-export default function Navbar({ isRevealed = true, onReplayIntro }) {
+export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate }) {
   const [activeHref, setActiveHref] = useState("#hero");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  const handleNavClick = (e, href) => {
+    e.preventDefault();
+    setActiveHref(href);
+    setIsMobileMenuOpen(false);
+    if (onNavigate) {
+      onNavigate(href);
+    } else {
+      const el = document.querySelector(href);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
 
   // Active section tracking via scroll position
   useEffect(() => {
-    const sectionIds = ["hero", "services", "projects", "about", "process", "contact"];
+    const sectionMap = [
+      { id: "hero", href: "#hero" },
+      { id: "services", href: "#services" },
+      { id: "why-tavqo", href: "#why-tavqo" },
+      { id: "average-is-expensive", href: "#why-tavqo" },
+      { id: "good-fit", href: "#good-fit" },
+      { id: "contact", href: "#contact" },
+      { id: "footer", href: "#contact" },
+    ];
+
     const handleScroll = () => {
       const scrollPos = window.scrollY + 160;
-      for (const id of sectionIds) {
-        const el = document.getElementById(id);
+      for (const item of sectionMap) {
+        const el = document.getElementById(item.id);
         if (el) {
           const top = el.offsetTop;
           const height = el.offsetHeight;
           if (scrollPos >= top && scrollPos < top + height) {
-            setActiveHref(`#${id}`);
-            return;
+            setActiveHref(item.href);
+            break;
           }
         }
       }
       if (window.scrollY < 200) {
         setActiveHref("#hero");
       }
+
+      // Check theme directly at Navbar elevation (y ~ 45px)
+      const navY = 45;
+
+      // 1. If reached Footer (#050508 dark), force dark navbar
+      const footerEl = document.getElementById("footer");
+      if (footerEl) {
+        const fRect = footerEl.getBoundingClientRect();
+        if (fRect.top <= navY) {
+          setIsLightMode(false);
+          return;
+        }
+      }
+
+      // 2. If in Value Clarity / Image Trail (#000000 dark), force dark navbar
+      const valueEl = document.getElementById("value-clarity");
+      if (valueEl) {
+        const vRect = valueEl.getBoundingClientRect();
+        if (vRect.top <= navY && vRect.bottom > navY) {
+          setIsLightMode(false);
+          return;
+        }
+      }
+
+      // 3. Check light sections (AverageIsExpensive / GoodFit)
+      const lightIds = ["average-is-expensive", "good-fit", "why-tavqo"];
+      let inLight = false;
+      for (const id of lightIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= navY && rect.bottom > navY) {
+            inLight = true;
+            break;
+          }
+        }
+      }
+      setIsLightMode(inLight);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -52,7 +113,7 @@ export default function Navbar({ isRevealed = true, onReplayIntro }) {
   return (
     <>
       <header
-        className={`fixed top-0 inset-x-0 z-50 w-full px-6 sm:px-10 lg:px-[6.5vw] py-5 sm:py-6 flex items-center justify-between transition-all duration-700 ease-out select-none ${
+        className={`fixed top-0 inset-x-0 z-50 w-full px-6 sm:px-10 lg:px-[6.5vw] py-5 sm:py-6 flex items-center justify-between transition-all duration-500 ease-out select-none ${
           isRevealed ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
         }`}
         style={{
@@ -66,7 +127,11 @@ export default function Navbar({ isRevealed = true, onReplayIntro }) {
             className="group flex items-center focus-visible:outline-none"
             aria-label="TAVQO Homepage"
           >
-            <span className="font-sans text-[21px] sm:text-[23px] font-medium tracking-[0.22em] text-white uppercase transition-opacity hover:opacity-90">
+            <span
+              className={`font-sans text-[21px] sm:text-[23px] font-medium tracking-[0.22em] uppercase transition-colors duration-300 hover:opacity-90 ${
+                isLightMode ? "text-[#0E0F14]" : "text-white"
+              }`}
+            >
               T<span className="inline-block transform scale-y-[0.96]">Λ</span>VQO
             </span>
           </a>
@@ -74,7 +139,11 @@ export default function Navbar({ isRevealed = true, onReplayIntro }) {
 
         {/* Center: Transparent Floating Navigation Row */}
         <nav
-          className="hidden md:flex items-center gap-7 lg:gap-9 text-[13px] font-sans tracking-[0.04em]"
+          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-8 md:gap-10 lg:gap-12 text-[13px] sm:text-[13.5px] font-sans tracking-[0.04em] px-8 md:px-10 lg:px-12 py-2 rounded-full min-w-[500px] lg:min-w-[580px] transition-all duration-300 shadow-sm ${
+            isLightMode
+              ? "bg-[#0E0F14]/[0.05] backdrop-blur-md border border-black/[0.08]"
+              : "bg-white/[0.04] backdrop-blur-md border border-white/[0.10]"
+          }`}
           aria-label="Main Navigation"
         >
           {navLinks.map((link) => {
@@ -83,9 +152,13 @@ export default function Navbar({ isRevealed = true, onReplayIntro }) {
               <a
                 key={link.label}
                 href={link.href}
-                onClick={() => setActiveHref(link.href)}
-                className={`relative py-1 transition-colors duration-200 ${
-                  isActive
+                onClick={(e) => handleNavClick(e, link.href)}
+                className={`relative py-1 transition-colors duration-300 ${
+                  isLightMode
+                    ? isActive
+                      ? "text-[#0E0F14] font-semibold"
+                      : "text-[#5A596E] hover:text-[#0E0F14]"
+                    : isActive
                     ? "text-white font-medium"
                     : "text-[#9E9EB2] hover:text-white"
                 }`}
@@ -94,10 +167,22 @@ export default function Navbar({ isRevealed = true, onReplayIntro }) {
                 {isActive && (
                   <div
                     aria-hidden="true"
-                    className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-9 flex items-center justify-center pointer-events-none"
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-11 flex items-center justify-center pointer-events-none"
                   >
-                    <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent relative">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]" />
+                    <div
+                      className={`w-full h-[1.5px] relative transition-colors duration-300 ${
+                        isLightMode
+                          ? "bg-gradient-to-r from-transparent via-[#0E0F14]/80 to-transparent"
+                          : "bg-gradient-to-r from-transparent via-white/90 to-transparent"
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+                          isLightMode
+                            ? "bg-[#0E0F14] shadow-[0_0_6px_rgba(14,15,20,0.5)]"
+                            : "bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+                        }`}
+                      />
                     </div>
                   </div>
                 )}
@@ -110,11 +195,22 @@ export default function Navbar({ isRevealed = true, onReplayIntro }) {
         <div className="flex items-center gap-3 shrink-0">
           <a
             href="#contact"
-            className="group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[13px] font-sans font-medium tracking-[0.04em] text-white border border-white/20 hover:border-white/50 bg-black/20 hover:bg-white/5 transition-all duration-300 active:scale-[0.98] focus-visible:outline-none"
+            onClick={(e) => handleNavClick(e, "#contact")}
+            className={`group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[13px] font-sans font-medium tracking-[0.04em] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none ${
+              isLightMode
+                ? "bg-[#0E0F14] text-[#FAF9F6] border border-[#0E0F14] hover:bg-[#1C1D26] shadow-md"
+                : "text-white border border-white/20 hover:border-white/50 bg-black/20 hover:bg-white/5"
+            }`}
           >
             <span>Start Your Project</span>
-            {/* Soft lilac circular arrow badge */}
-            <span className="w-6 h-6 rounded-full bg-[#D4CFFF] group-hover:bg-white text-[#050508] flex items-center justify-center text-[12px] font-bold transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shadow-xs">
+            {/* Circular arrow badge */}
+            <span
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shadow-xs ${
+                isLightMode
+                  ? "bg-white/20 text-[#FAF9F6] group-hover:bg-white/30"
+                  : "bg-[#D4CFFF] group-hover:bg-white text-[#050508]"
+              }`}
+            >
               ↗
             </span>
           </a>
@@ -125,7 +221,11 @@ export default function Navbar({ isRevealed = true, onReplayIntro }) {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
-            className="md:hidden flex items-center justify-center w-9 h-9 rounded-full text-white border border-white/20 bg-[#090910] hover:bg-white/10 transition-colors focus-visible:outline-none"
+            className={`md:hidden flex items-center justify-center w-9 h-9 rounded-full transition-colors focus-visible:outline-none ${
+              isLightMode
+                ? "text-[#0E0F14] border border-[#0E0F14]/25 bg-black/5 hover:bg-black/10"
+                : "text-white border border-white/20 bg-[#090910] hover:bg-white/10"
+            }`}
           >
             {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
@@ -163,10 +263,7 @@ export default function Navbar({ isRevealed = true, onReplayIntro }) {
                     <a
                       key={link.label}
                       href={link.href}
-                      onClick={() => {
-                        setActiveHref(link.href);
-                        setIsMobileMenuOpen(false);
-                      }}
+                      onClick={(e) => handleNavClick(e, link.href)}
                       className={`flex items-center justify-between px-4 py-3 rounded-xl text-[14px] font-sans font-medium transition-colors ${
                         isActive
                           ? "text-white bg-[#1e1e26] border border-white/[0.14]"

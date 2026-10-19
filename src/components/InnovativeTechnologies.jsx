@@ -46,8 +46,8 @@ export default function InnovativeTechnologies() {
       tagline: "Scalable API fabrics & low-latency streaming",
       benchmark: "Sub-40ms P99 API Latency",
       description:
-        "Fault-tolerant microservices, bidirectional WebSocket streaming channels, resilient relational schemas, and global edge caching delivering deterministic performance under heavy concurrency.",
-      stack: ["Go", "Node.js", "PostgreSQL", "Redis Caching", "WebSockets"],
+        "Fault-tolerant microservices architectures, Kafka event streaming fabrics, Java Spring Boot backends, resilient PostgreSQL schemas, and global edge caching delivering deterministic performance under heavy concurrency.",
+      stack: ["Java", "Spring Boot", "Kafka", "Microservices", "PostgreSQL"],
       metrics: [
         { label: "Concurrent Conns", value: "50,000+" },
         { label: "Uptime SLA", value: "99.98%" },
