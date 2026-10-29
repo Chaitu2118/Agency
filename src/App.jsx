@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,15 +9,15 @@ import Services from "./components/ServicesWithCube";
 import AverageIsExpensive from "./components/AverageIsExpensive";
 import ValuePropositionTrail from "./components/ValuePropositionTrail";
 import GoodFit from "./components/GoodFit";
-
 import Footer from "./components/Footer";
 import CinematicIntro from "./components/CinematicIntro";
 import TheTavqoLogo from "./components/TheTavqoLogo";
 import Preloader from "./components/Preloader";
+import About from "./pages/About";
 
 gsap.registerPlugin(ScrollTrigger);
 
-function App() {
+function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isHomepageRevealed, setIsHomepageRevealed] = useState(true);
   const [introKey, setIntroKey] = useState(1);
@@ -152,6 +153,18 @@ function App() {
         <Footer onReplayIntro={handleReplayIntro} />
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="*" element={<HomePage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

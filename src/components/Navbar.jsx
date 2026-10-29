@@ -6,40 +6,109 @@ import TheTavqoLogo from "./TheTavqoLogo";
 /**
  * TAVQO Dark-Luxury Capsule Island Navigation
  * Inspired by reference design:
- * - Left: Abstract emblem mark + clean brand wordmark (Tavqo)
+ * - Left: Abstract emblem mark + clean brand wordmark (TAVQO)
  * - Center: Floating dark-glass capsule island with animated active pill tab
  * - Right: Tactile dark pill CTA button ("Start Your Project") with precision rim light
  * - Fully responsive with an elegant dark drawer on mobile
+ * - Supports multi-page navigation (Home & About) without regressions
  */
 const navLinks = [
-  { label: "Home", href: "#hero" },
-  { label: "Services", href: "#services" },
-  { label: "Why TAVQO", href: "#why-tavqo" },
-  { label: "Process", href: "#good-fit" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "#hero", pageHref: "/" },
+  { label: "About", href: "/about", pageHref: "/about" },
+  { label: "Services", href: "#services", pageHref: "/#services" },
+  { label: "Projects", href: "#why-tavqo", pageHref: "/#why-tavqo" },
+  { label: "Insights", href: "#good-fit", pageHref: "/#good-fit" },
+  { label: "Contact", href: "#contact", pageHref: "/#contact" },
 ];
 
-export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate }) {
-  const [activeHref, setActiveHref] = useState("#hero");
+export default function Navbar({ 
+  isRevealed = true, 
+  onReplayIntro, 
+  onNavigate,
+  currentRoute = "home" 
+}) {
+  const isAbout = currentRoute === "about" || (typeof window !== "undefined" && window.location.pathname.startsWith("/about"));
+  const [activeHref, setActiveHref] = useState(isAbout ? "/about" : "#hero");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLightMode, setIsLightMode] = useState(false);
 
-  const handleNavClick = (e, href) => {
-    e.preventDefault();
-    setActiveHref(href);
+  const handleNavClick = (e, link) => {
     setIsMobileMenuOpen(false);
-    if (onNavigate) {
-      onNavigate(href);
-    } else {
-      const el = document.querySelector(href);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
+
+    // If navigating to /about
+    if (link.href === "/about" || link.pageHref === "/about") {
+      if (typeof window !== "undefined") {
+        if (window.location.pathname === "/about") {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          window.location.href = "/about";
+        }
       }
+      return;
+    }
+
+    // If currently on /about
+    if (isAbout) {
+      if (link.label === "Home") {
+        window.location.href = "/";
+        return;
+      }
+      if (link.href.startsWith("#")) {
+        const localEl = document.querySelector(link.href);
+        if (localEl) {
+          e.preventDefault();
+          localEl.scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+        window.location.href = `/${link.href}`;
+        return;
+      }
+      window.location.href = link.pageHref || link.href;
+      return;
+    }
+
+    // If on homepage
+    if (link.href.startsWith("#")) {
+      e.preventDefault();
+      setActiveHref(link.href);
+      if (onNavigate) {
+        onNavigate(link.href);
+      } else {
+        const el = document.querySelector(link.href);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    } else {
+      window.location.href = link.href;
+    }
+  };
+
+  const handleLogoClick = (e) => {
+    if (isAbout) {
+      window.location.href = "/";
+    } else {
+      handleNavClick(e, { label: "Home", href: "#hero", pageHref: "/" });
+    }
+  };
+
+  const handleCtaClick = (e) => {
+    if (isAbout) {
+      window.location.href = "/#contact";
+    } else {
+      handleNavClick(e, { label: "Contact", href: "#contact", pageHref: "/#contact" });
     }
   };
 
   // Active section tracking via scroll position
   useEffect(() => {
+    if (isAbout) {
+      setActiveHref("/about");
+      setIsLightMode(false);
+      return;
+    }
+
     const sectionMap = [
       { id: "hero", href: "#hero" },
       { id: "services", href: "#services" },
@@ -108,7 +177,7 @@ export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate })
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isAbout]);
 
   return (
     <>
@@ -123,8 +192,9 @@ export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate })
         {/* Left: TΛVQO Wordmark */}
         <div className="flex items-center shrink-0">
           <a
-            href="#hero"
-            className="group flex items-center focus-visible:outline-none"
+            href={isAbout ? "/" : "#hero"}
+            onClick={handleLogoClick}
+            className="group flex items-center focus-visible:outline-none cursor-pointer"
             aria-label="TAVQO Homepage"
           >
             <span
@@ -139,7 +209,7 @@ export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate })
 
         {/* Center: Transparent Floating Navigation Row */}
         <nav
-          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-8 md:gap-10 lg:gap-12 text-[13px] sm:text-[13.5px] font-sans tracking-[0.04em] px-8 md:px-10 lg:px-12 py-2 rounded-full min-w-[500px] lg:min-w-[580px] transition-all duration-300 shadow-sm ${
+          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-7 md:gap-9 lg:gap-11 text-[13px] sm:text-[13.5px] font-sans tracking-[0.04em] px-8 md:px-10 lg:px-12 py-2 rounded-full min-w-[520px] lg:min-w-[620px] transition-all duration-300 shadow-sm ${
             isLightMode
               ? "bg-[#0E0F14]/[0.05] backdrop-blur-md border border-black/[0.08]"
               : "bg-white/[0.04] backdrop-blur-md border border-white/[0.10]"
@@ -147,13 +217,16 @@ export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate })
           aria-label="Main Navigation"
         >
           {navLinks.map((link) => {
-            const isActive = activeHref === link.href;
+            const isActive = isAbout
+              ? (link.href === "/about" || link.pageHref === "/about")
+              : (activeHref === link.href);
+
             return (
               <a
                 key={link.label}
                 href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className={`relative py-1 transition-colors duration-300 ${
+                onClick={(e) => handleNavClick(e, link)}
+                className={`relative py-1 transition-colors duration-300 cursor-pointer ${
                   isLightMode
                     ? isActive
                       ? "text-[#0E0F14] font-semibold"
@@ -194,9 +267,9 @@ export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate })
         {/* Right: Outlined Pill CTA & Mobile Toggle */}
         <div className="flex items-center gap-3 shrink-0">
           <a
-            href="#contact"
-            onClick={(e) => handleNavClick(e, "#contact")}
-            className={`group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[13px] font-sans font-medium tracking-[0.04em] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none ${
+            href={isAbout ? "/#contact" : "#contact"}
+            onClick={handleCtaClick}
+            className={`group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[13px] font-sans font-medium tracking-[0.04em] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none cursor-pointer ${
               isLightMode
                 ? "bg-[#0E0F14] text-[#FAF9F6] border border-[#0E0F14] hover:bg-[#1C1D26] shadow-md"
                 : "text-white border border-white/20 hover:border-white/50 bg-black/20 hover:bg-white/5"
@@ -258,13 +331,16 @@ export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate })
             >
               <nav className="flex flex-col gap-1.5">
                 {navLinks.map((link) => {
-                  const isActive = activeHref === link.href;
+                  const isActive = isAbout
+                    ? (link.href === "/about" || link.pageHref === "/about")
+                    : (activeHref === link.href);
+
                   return (
                     <a
                       key={link.label}
                       href={link.href}
-                      onClick={(e) => handleNavClick(e, link.href)}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl text-[14px] font-sans font-medium transition-colors ${
+                      onClick={(e) => handleNavClick(e, link)}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl text-[14px] font-sans font-medium transition-colors cursor-pointer ${
                         isActive
                           ? "text-white bg-[#1e1e26] border border-white/[0.14]"
                           : "text-[#88889a] hover:text-white hover:bg-white/[0.04]"
@@ -281,9 +357,9 @@ export default function Navbar({ isRevealed = true, onReplayIntro, onNavigate })
                 <div className="h-px bg-white/10 my-2" />
 
                 <a
-                  href="#contact"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-center w-full py-3 rounded-full bg-[#14141e] hover:bg-white/10 text-white border border-white/[0.15] text-[13.5px] font-sans font-medium transition-all"
+                  href={isAbout ? "/#contact" : "#contact"}
+                  onClick={handleCtaClick}
+                  className="flex items-center justify-center w-full py-3 rounded-full bg-[#14141e] hover:bg-white/10 text-white border border-white/[0.15] text-[13.5px] font-sans font-medium transition-all cursor-pointer"
                   style={{
                     boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.18)",
                   }}
