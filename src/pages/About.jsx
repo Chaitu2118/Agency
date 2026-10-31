@@ -54,7 +54,7 @@ export default function About() {
       {/* 4. Bold Editorial Capabilities Section */}
       <AboutCapabilitiesSection />
 
-      {/* 5. Built Through Collaboration Section (Liquid FlexCarousel) */}
+      {/* 5. Built Through Collaboration Section (Custom Scroll Dissolve Reveal) */}
       <AboutCollaborationSection />
 
       {/* 6. The People Around TAVQO Carousel Section */}
