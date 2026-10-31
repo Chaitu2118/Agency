@@ -15,9 +15,7 @@ import TheTavqoLogo from "./TheTavqoLogo";
 const navLinks = [
   { label: "Home", href: "#hero", pageHref: "/" },
   { label: "About", href: "/about", pageHref: "/about" },
-  { label: "Services", href: "#services", pageHref: "/#services" },
-  { label: "Projects", href: "#why-tavqo", pageHref: "/#why-tavqo" },
-  { label: "Insights", href: "#good-fit", pageHref: "/#good-fit" },
+  { label: "Services", href: "/services", pageHref: "/services" },
   { label: "Contact", href: "#contact", pageHref: "/#contact" },
 ];
 
@@ -28,9 +26,11 @@ export default function Navbar({
   currentRoute = "home" 
 }) {
   const isAbout = currentRoute === "about" || (typeof window !== "undefined" && window.location.pathname.startsWith("/about"));
-  const [activeHref, setActiveHref] = useState(isAbout ? "/about" : "#hero");
+  const isServices = currentRoute === "services" || (typeof window !== "undefined" && window.location.pathname.startsWith("/services"));
+  const isMultiPage = isAbout || isServices;
+  const [activeHref, setActiveHref] = useState(isAbout ? "/about" : (isServices ? "/services" : "#hero"));
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLightMode, setIsLightMode] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(isServices);
 
   const handleNavClick = (e, link) => {
     setIsMobileMenuOpen(false);
@@ -48,8 +48,21 @@ export default function Navbar({
       return;
     }
 
-    // If currently on /about
-    if (isAbout) {
+    // If navigating to /services
+    if (link.href === "/services" || link.pageHref === "/services") {
+      if (typeof window !== "undefined") {
+        if (window.location.pathname === "/services") {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          window.location.href = "/services";
+        }
+      }
+      return;
+    }
+
+    // If currently on a subpage (/about or /services)
+    if (isMultiPage) {
       if (link.label === "Home") {
         window.location.href = "/";
         return;
@@ -86,7 +99,7 @@ export default function Navbar({
   };
 
   const handleLogoClick = (e) => {
-    if (isAbout) {
+    if (isMultiPage) {
       window.location.href = "/";
     } else {
       handleNavClick(e, { label: "Home", href: "#hero", pageHref: "/" });
@@ -94,7 +107,7 @@ export default function Navbar({
   };
 
   const handleCtaClick = (e) => {
-    if (isAbout) {
+    if (isMultiPage) {
       window.location.href = "/#contact";
     } else {
       handleNavClick(e, { label: "Contact", href: "#contact", pageHref: "/#contact" });
@@ -106,6 +119,12 @@ export default function Navbar({
     if (isAbout) {
       setActiveHref("/about");
       setIsLightMode(false);
+      return;
+    }
+
+    if (isServices) {
+      setActiveHref("/services");
+      setIsLightMode(true);
       return;
     }
 
@@ -209,7 +228,7 @@ export default function Navbar({
 
         {/* Center: Transparent Floating Navigation Row */}
         <nav
-          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-7 md:gap-9 lg:gap-11 text-[13px] sm:text-[13.5px] font-sans tracking-[0.04em] px-8 md:px-10 lg:px-12 py-2 rounded-full min-w-[520px] lg:min-w-[620px] transition-all duration-300 shadow-sm ${
+          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-7 md:gap-8 lg:gap-10 text-[13px] sm:text-[13.5px] font-sans tracking-[0.04em] px-7 md:px-9 py-2 rounded-full min-w-[340px] md:min-w-[390px] transition-all duration-300 shadow-sm ${
             isLightMode
               ? "bg-[#0E0F14]/[0.05] backdrop-blur-md border border-black/[0.08]"
               : "bg-white/[0.04] backdrop-blur-md border border-white/[0.10]"
@@ -219,7 +238,9 @@ export default function Navbar({
           {navLinks.map((link) => {
             const isActive = isAbout
               ? (link.href === "/about" || link.pageHref === "/about")
-              : (activeHref === link.href);
+              : (isServices
+                ? (link.href === "/services" || link.pageHref === "/services")
+                : (activeHref === link.href));
 
             return (
               <a

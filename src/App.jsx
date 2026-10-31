@@ -14,6 +14,7 @@ import CinematicIntro from "./components/CinematicIntro";
 import TheTavqoLogo from "./components/TheTavqoLogo";
 import Preloader from "./components/Preloader";
 import About from "./pages/About";
+import ServicesPage from "./pages/Services";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -162,6 +163,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/services" element={<ServicesPage />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
     </BrowserRouter>
