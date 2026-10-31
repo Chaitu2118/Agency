@@ -11,9 +11,9 @@ import ValuePropositionTrail from "./components/ValuePropositionTrail";
 import GoodFit from "./components/GoodFit";
 import Footer from "./components/Footer";
 import CinematicIntro from "./components/CinematicIntro";
-import TheTavqoLogo from "./components/TheTavqoLogo";
 import Preloader from "./components/Preloader";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -162,6 +162,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
     </BrowserRouter>

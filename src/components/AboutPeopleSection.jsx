@@ -239,7 +239,7 @@ export default function AboutPeopleSection() {
 
           {/* Primary CTA Button */}
           <a
-            href="/#contact"
+            href="/contact"
             className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-[#141416] text-[#FAF8F5] hover:bg-[#2B2B32] active:scale-[0.98] font-sans text-xs sm:text-[13px] font-semibold tracking-wider uppercase transition-all duration-200 group shadow-sm cursor-pointer"
           >
             <span>LET'S TALK</span>

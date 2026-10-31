@@ -74,7 +74,7 @@ export default function About() {
           <a href="/" className="hover:text-white transition-colors">Home</a>
           <a href="/about" className="text-white font-bold transition-colors">About</a>
           <a href="/#services" className="hover:text-white transition-colors">Services</a>
-          <a href="/#contact" className="hover:text-white transition-colors">Contact</a>
+          <a href="/contact" className="hover:text-white transition-colors">Contact</a>
         </div>
       </footer>
     </div>

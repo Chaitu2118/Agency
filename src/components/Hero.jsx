@@ -399,7 +399,7 @@ export default function Hero({ isRevealed = true }) {
 
           <div>
             <a
-              href="#contact"
+              href="/contact"
               className="group inline-flex items-center gap-3.5 px-6 py-3.5 sm:px-7 sm:py-3.5 rounded-full text-[13.5px] font-sans font-medium tracking-[0.04em] text-white border border-[rgba(211,205,255,0.28)] hover:border-[#8E83FF] bg-gradient-to-r from-[#11112C] to-[#1a1748] transition-all duration-300 shadow-[0_0_20px_rgba(81,71,255,0.2)] hover:shadow-[0_0_30px_rgba(142,131,255,0.4)] active:scale-[0.98] focus-visible:outline-none"
             >
               <span>Start Your Project</span>

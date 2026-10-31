@@ -32,25 +32,26 @@ function XIcon({ className = "w-3.5 h-3.5" }) {
 
 // Actual TAVQO Website Navigation Links
 const quickLinks = [
-  { label: "Home", href: "#hero" },
-  { label: "Services", href: "#services" },
-  { label: "Why TAVQO", href: "#why-tavqo" },
-  { label: "Process", href: "#good-fit" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Services", href: "/#services" },
+  { label: "Why TAVQO", href: "/#why-tavqo" },
+  { label: "Process", href: "/#good-fit" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const serviceLinks = [
-  { label: "Websites & Digital Experiences", href: "#services" },
-  { label: "Mobile App Development", href: "#services" },
-  { label: "Product Engineering & Dashboards", href: "#services" },
-  { label: "AI & Intelligent Automation", href: "#services" },
-  { label: "IoT & Smart Systems", href: "#services" },
-  { label: "Immersive 3D Experiences", href: "#services" },
+  { label: "Websites & Digital Experiences", href: "/#services" },
+  { label: "Mobile App Development", href: "/#services" },
+  { label: "Product Engineering & Dashboards", href: "/#services" },
+  { label: "AI & Intelligent Automation", href: "/#services" },
+  { label: "IoT & Smart Systems", href: "/#services" },
+  { label: "Immersive 3D Experiences", href: "/#services" },
 ];
 
 const exploreLinks = [
-  { label: "Client Inquiries", href: "mailto:hello@tavqo.com" },
-  { label: "Careers", href: "#footer" },
+  { label: "Client Inquiries", href: "/contact" },
+  { label: "Careers", href: "mailto:hello@tavqo.com?subject=Career%20Inquiry%20-%20TAVQO" },
   { label: "Privacy Policy", href: "#footer" },
   { label: "Terms of Service", href: "#footer" },
 ];
@@ -113,7 +114,7 @@ function FooterComponent() {
           <div className="lg:col-span-4 lg:pr-8">
             {/* Brand Logo & Wordmark (T logo icon removed as requested) */}
             <a
-              href="#hero"
+              href="/"
               className="inline-flex flex-col group focus-visible:outline-none"
               aria-label="TAVQO Home"
             >
@@ -130,28 +131,34 @@ function FooterComponent() {
               We design, develop and engineer digital products, brands and systems that help businesses grow in a connected world.
             </p>
 
-            {/* "Connect with us:" and inline social icons (website icon removed) */}
+            {/* "Connect with us:" and inline social icons */}
             <div className="flex items-center gap-3">
               <span className="text-[13px] font-sans text-[#9696A8] font-normal">
                 Connect with us:
               </span>
               <div className="flex items-center gap-2">
                 <a
-                  href="#contact"
+                  href="https://www.linkedin.com/company/tavqo"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.06] border border-white/10 text-[#C4C3D0] hover:text-white hover:border-[#8275FF]/60 hover:bg-[#8275FF]/20 transition-all duration-200"
                   aria-label="LinkedIn"
                 >
                   <LinkedinIcon className="w-3.5 h-3.5" />
                 </a>
                 <a
-                  href="#contact"
+                  href="https://www.instagram.com/tavqo.studio"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.06] border border-white/10 text-[#C4C3D0] hover:text-white hover:border-[#8275FF]/60 hover:bg-[#8275FF]/20 transition-all duration-200"
                   aria-label="Instagram"
                 >
                   <InstagramIcon className="w-3.5 h-3.5" />
                 </a>
                 <a
-                  href="#contact"
+                  href="https://x.com/tavqostudio"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.06] border border-white/10 text-[#C4C3D0] hover:text-white hover:border-[#8275FF]/60 hover:bg-[#8275FF]/20 transition-all duration-200"
                   aria-label="X (formerly Twitter)"
                 >
@@ -231,7 +238,6 @@ function FooterComponent() {
 
         {/* --------------------------------------------------------------- */}
         {/* CLEAN COPYRIGHT ROW IN PROPER SANS FONT                         */}
-        {/* (Built for what's next and replay intro removed)                */}
         {/* --------------------------------------------------------------- */}
         <div className="py-6 border-t border-white/[0.08] flex items-center justify-between">
           <p className="font-sans text-[13px] sm:text-[14px] text-[#9696A8] font-light tracking-normal">
