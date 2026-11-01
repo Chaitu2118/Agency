@@ -11,7 +11,7 @@ export default function AboutHero() {
   return (
     <section
       aria-label="About TAVQO Hero"
-      className="relative w-full h-[85vh] min-h-[580px] max-h-[920px] overflow-hidden flex flex-col justify-between bg-[#07080D] text-white select-none"
+      className="relative w-full h-[85vh] min-h-[580px] max-h-[920px] overflow-hidden flex flex-col justify-end bg-[#07080D] text-white select-none pt-28 sm:pt-32"
     >
       {/* 1. Full-Width Background Photographic Image */}
       <div className="absolute inset-0 z-0">
@@ -37,16 +37,6 @@ export default function AboutHero() {
           className="absolute inset-0 bg-gradient-to-t from-[#07080D] via-[#07080D]/75 to-transparent pointer-events-none"
           style={{ top: "35%" }}
         />
-      </div>
-
-      {/* 2. Top Header Space (Navbar Clearance & Small Label) */}
-      <div className="relative z-10 pt-28 sm:pt-32 px-6 sm:px-10 lg:px-[6.5vw]">
-        <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#5268FF] animate-pulse" />
-          <span className="text-[10px] sm:text-[11.5px] font-mono tracking-[0.24em] uppercase text-white/90 font-semibold">
-            ABOUT TAVQO
-          </span>
-        </div>
       </div>
 
       {/* 3. Lower-Middle & Bottom Typography Hierarchy */}

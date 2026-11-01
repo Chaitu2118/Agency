@@ -13,6 +13,7 @@ import Footer from "./components/Footer";
 
 // Lazy-load secondary pages for optimal initial route performance
 const About = lazy(() => import("./pages/About"));
+const ServicesPage = lazy(() => import("./pages/Services"));
 const Contact = lazy(() => import("./pages/Contact"));
 
 gsap.registerPlugin(ScrollTrigger);
@@ -99,6 +100,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<About />} />
+          <Route path="/services" element={<ServicesPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<HomePage />} />
         </Routes>

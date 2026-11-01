@@ -1,7 +1,29 @@
 import { useState, useRef, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import ClayRobot from "../components/ClayRobot";
-import { Mail, Copy, Check, Upload, FileText, X, ArrowRight, Loader2 } from "lucide-react";
+import Footer from "../components/Footer";
+import Lenis from "lenis";
+import gsap from "gsap";
+import { Mail, Copy, Check, X, ArrowRight, Loader2, AlertCircle, ChevronDown } from "lucide-react";
+
+const PROJECT_TYPE_OPTIONS = [
+  { value: "Web Application / Platform", label: "Web Application / Platform" },
+  { value: "Mobile Application (iOS / Android)", label: "Mobile Application (iOS / Android)" },
+  { value: "AI & Intelligent Systems", label: "AI & Intelligent Systems" },
+  { value: "Creative Technology & 3D Experience", label: "Creative Technology & 3D Experience" },
+  { value: "Product Engineering & Architecture", label: "Product Engineering & Architecture" },
+  { value: "Brand Experience & Design Systems", label: "Brand Experience & Design Systems" },
+  { value: "Other / Custom Exploration", label: "Other / Custom Exploration" },
+];
+
+const BUDGET_OPTIONS = [
+  { value: "Under $10,000", label: "Under $10,000" },
+  { value: "$10,000 – $25,000", label: "$10,000 – $25,000" },
+  { value: "$25,000 – $50,000", label: "$25,000 – $50,000" },
+  { value: "$50,000 – $100,000", label: "$50,000 – $100,000" },
+  { value: "$100,000+", label: "$100,000+" },
+  { value: "Flexible / To be discussed", label: "Flexible / To be discussed" },
+];
 
 /**
  * TAVQO — Contact Us Page
@@ -16,22 +38,92 @@ import { Mail, Copy, Check, Upload, FileText, X, ArrowRight, Loader2 } from "luc
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
-    organisation: "",
     email: "",
-    role: "",
+    projectType: "",
+    company: "",
+    budget: "",
     message: "",
+    botcheck: false,
   });
-  const [attachment, setAttachment] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState({ type: null, message: "" });
+  const [submittedData, setSubmittedData] = useState(null);
   const [copied, setCopied] = useState(false);
-  const fileInputRef = useRef(null);
+  const [projectTypeOpen, setProjectTypeOpen] = useState(false);
+  const [budgetOpen, setBudgetOpen] = useState(false);
+  const formPanelRef = useRef(null);
+  const projectTypeRef = useRef(null);
+  const budgetRef = useRef(null);
 
-  // Document metadata for Contact page
+  // Close custom dropdowns on outside pointer click or Escape key
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (projectTypeRef.current && !projectTypeRef.current.contains(e.target)) {
+        setProjectTypeOpen(false);
+      }
+      if (budgetRef.current && !budgetRef.current.contains(e.target)) {
+        setBudgetOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setProjectTypeOpen(false);
+        setBudgetOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const handleSelectProjectType = (val) => {
+    setFormData((prev) => ({ ...prev, projectType: val }));
+    setProjectTypeOpen(false);
+    if (formErrors.projectType) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next.projectType;
+        return next;
+      });
+    }
+  };
+
+  const handleSelectBudget = (val) => {
+    setFormData((prev) => ({ ...prev, budget: val }));
+    setBudgetOpen(false);
+  };
+
+  const toggleProjectType = () => {
+    setProjectTypeOpen((prev) => !prev);
+    setBudgetOpen(false);
+  };
+
+  const toggleBudget = () => {
+    setBudgetOpen((prev) => !prev);
+    setProjectTypeOpen(false);
+  };
+
+  const selectedProjectType = PROJECT_TYPE_OPTIONS.find(
+    (opt) => opt.value === formData.projectType
+  );
+  const selectedBudget = BUDGET_OPTIONS.find(
+    (opt) => opt.value === formData.budget
+  );
+
+  // Access key from environment (Vite exposes VITE_* variables)
+  const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "";
+
+  // Document metadata and Lenis smooth scroll for Contact page
   useEffect(() => {
     document.title = "Contact TAVQO — Let's Build What's Next";
+    window.scrollTo({ top: 0, behavior: "instant" });
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
@@ -39,36 +131,99 @@ export default function Contact() {
         "Have an idea, a challenge, or a product in mind? Contact TAVQO Creative Technology Studio. We'd love to explore what we can build together."
       );
     }
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 1.5,
+    });
+
+    const updateLenis = (time) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateLenis);
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      gsap.ticker.remove(updateLenis);
+      lenis.destroy();
+    };
+  }, []);
+
+  // Dynamic interactive top border tracking mouse X position
+  useEffect(() => {
+    let rafId = 0;
+    let targetX = 50;
+    let currentX = 50;
+
+    const handlePointerMove = (e) => {
+      if (!formPanelRef.current) return;
+      const rect = formPanelRef.current.getBoundingClientRect();
+      targetX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    };
+
+    const updateGlow = () => {
+      currentX += (targetX - currentX) * 0.12;
+      if (formPanelRef.current) {
+        formPanelRef.current.style.setProperty("--border-x", `${currentX.toFixed(2)}%`);
+      }
+      rafId = requestAnimationFrame(updateGlow);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    rafId = requestAnimationFrame(updateGlow);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAttachment(file);
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    // Clear error for this field as the user types
+    if (formErrors[name]) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
     }
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      setAttachment(file);
+  const validate = () => {
+    const errors = {};
+    if (!formData.name.trim()) {
+      errors.name = "Full name is required";
     }
+    if (!formData.email.trim()) {
+      errors.email = "Email address is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      errors.email = "Please enter a valid email address";
+    }
+    if (!formData.projectType) {
+      errors.projectType = "Please select a project type";
+    }
+    if (!formData.message.trim()) {
+      errors.message = "Project description is required";
+    } else if (formData.message.trim().length < 10) {
+      errors.message = "Please provide at least 10 characters describing your project";
+    }
+    if (!agreedToTerms) {
+      errors.terms = "You must agree to the processing of personal data";
+    }
+    return errors;
   };
 
   const handleCopyEmail = async () => {
@@ -81,29 +236,99 @@ export default function Contact() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!agreedToTerms) return;
+    setSubmitStatus({ type: null, message: "" });
+
+    // Validate form
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
+
+    // Honeypot check: silently drop bots
+    if (formData.botcheck) {
+      return;
+    }
+
+    if (!WEB3FORMS_ACCESS_KEY) {
+      setSubmitStatus({
+        type: "error",
+        message:
+          "Web3Forms access key is not configured. Please add VITE_WEB3FORMS_ACCESS_KEY to your .env file.",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
-    // Real submission simulation / webhook connection point
-    setTimeout(() => {
+
+    try {
+      const payload = {
+        access_key: WEB3FORMS_ACCESS_KEY,
+        subject: `New Project Enquiry — ${formData.projectType || "TAVQO"}`,
+        from_name: "TAVQO Studio Website",
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        project_type: formData.projectType,
+        company: formData.company.trim() || "Not specified",
+        budget: formData.budget || "Not specified",
+        message: formData.message.trim(),
+        botcheck: formData.botcheck ? "spam" : "",
+      };
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSubmittedData({ ...formData });
+        setSubmitStatus({
+          type: "success",
+          message: data.message || "Message sent successfully!",
+        });
+        // Reset form ONLY after successful submission
+        setFormData({
+          name: "",
+          email: "",
+          projectType: "",
+          company: "",
+          budget: "",
+          message: "",
+          botcheck: false,
+        });
+        setAgreedToTerms(false);
+        setFormErrors({});
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message:
+            data.message ||
+            "Unable to submit enquiry. Please verify your details or try again.",
+        });
+      }
+    } catch {
+      setSubmitStatus({
+        type: "error",
+        message:
+          "Network connection error. Please check your internet connection or email us directly at hello@thetavqo.com.",
+      });
+    } finally {
       setIsSubmitting(false);
-      setSubmitted(true);
-    }, 900);
+    }
   };
 
   const handleReset = () => {
-    setFormData({
-      name: "",
-      organisation: "",
-      email: "",
-      role: "",
-      message: "",
-    });
-    setAttachment(null);
-    setAgreedToTerms(false);
-    setSubmitted(false);
+    setSubmitStatus({ type: null, message: "" });
+    setSubmittedData(null);
   };
 
   return (
@@ -215,7 +440,7 @@ export default function Contact() {
 
             {/* Direct Email Address CTA */}
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-xs font-mono uppercase tracking-wider text-white/40">Email us on:</span>
+              <span className="text-xs font-sans text-white/50">Email us on:</span>
               <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-[#8275FF]/60 hover:bg-white/[0.05] transition-all group">
                 <Mail className="w-4 h-4 text-[#8275FF] shrink-0" />
                 <a
@@ -239,7 +464,7 @@ export default function Contact() {
                 </button>
               </div>
               {copied && (
-                <span className="text-xs text-emerald-400 font-mono transition-opacity">
+                <span className="text-xs text-emerald-400 font-sans transition-opacity">
                   Copied!
                 </span>
               )}
@@ -257,14 +482,19 @@ export default function Contact() {
             {/* 100% Transparent WebGL background, no black box,              */}
             {/* slightly overlapping the top edge of the contact form panel.  */}
             {/* ------------------------------------------------------------- */}
-            <div className="relative z-20 w-[300px] sm:w-[340px] lg:w-[380px] h-[280px] sm:h-[310px] lg:h-[330px] -mb-12 sm:-mb-14 lg:-mb-16 pointer-events-auto select-none mx-auto lg:mr-16 xl:mr-24 bg-transparent">
+            {/* ------------------------------------------------------------- */}
+            {/* UPPER CENTRE-RIGHT: Interactive ClayRobot                     */}
+            {/* Waddles and walks gracefully ABOVE the contact form panel     */}
+            {/* ------------------------------------------------------------- */}
+            <div className="relative z-20 w-full max-w-[850px] lg:max-w-[940px] xl:max-w-[1000px] h-[220px] sm:h-[240px] lg:h-[260px] -mb-4 sm:-mb-5 lg:-mb-6 pointer-events-auto select-none mx-auto bg-transparent">
               <ClayRobot
                 transparent={true}
-                walk={false}
+                walk={true}
+                walkSpeed={5.5}
                 animate={true}
                 blink={true}
                 wave={true}
-                scale={108}
+                scale={94}
                 response={{
                   track: "page",
                   headTurn: 8,
@@ -299,33 +529,79 @@ export default function Contact() {
               />
 
               {/* Main Transparent Glass Panel */}
-              <div className="relative rounded-[28px] sm:rounded-[32px] lg:rounded-[36px] bg-white/[0.025] backdrop-blur-2xl border border-white/10 hover:border-[#8275FF]/30 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] p-7 sm:p-10 lg:p-12 xl:p-14 overflow-hidden transition-colors">
-                {/* Precision top edge violet accent light */}
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#8275FF]/60 to-transparent pointer-events-none" />
+              <div
+                ref={formPanelRef}
+                className="relative rounded-[28px] sm:rounded-[32px] lg:rounded-[36px] bg-white/[0.025] backdrop-blur-2xl border border-white/10 hover:border-[#8275FF]/30 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] p-7 sm:p-10 lg:p-12 xl:p-14 overflow-hidden transition-colors"
+                style={{ "--border-x": "50%" }}
+              >
+                {/* Precision interactive top edge violet accent light beam tracking mouse */}
+                <div
+                  className="absolute top-0 inset-x-0 h-px pointer-events-none transition-opacity duration-300"
+                  style={{
+                    background:
+                      "radial-gradient(420px circle at var(--border-x, 50%) 0px, rgba(185, 175, 255, 0.95), rgba(130, 117, 255, 0.6) 35%, rgba(130, 117, 255, 0.1) 70%, transparent 100%)",
+                  }}
+                />
+                {/* Soft ambient violet glow beam tracking along top border */}
+                <div
+                  aria-hidden="true"
+                  className="absolute top-0 inset-x-0 h-8 pointer-events-none opacity-40 blur-md transition-opacity duration-300"
+                  style={{
+                    background:
+                      "radial-gradient(320px circle at var(--border-x, 50%) 0px, rgba(130, 117, 255, 0.45), transparent 75%)",
+                  }}
+                />
 
-                {submitted ? (
-                  /* Submission Confirmation */
-                  <div className="py-12 sm:py-16 px-4 sm:px-8 text-center flex flex-col items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-6 text-emerald-400">
+                {submitStatus.type === "success" ? (
+                  /* Premium Submission Confirmation */
+                  <div className="py-12 sm:py-16 px-4 sm:px-8 text-center flex flex-col items-center justify-center animate-in fade-in duration-500">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-6 text-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.15)]">
                       <Check className="w-8 h-8" />
                     </div>
                     <h3 className="text-2xl sm:text-3xl font-medium text-white mb-3">
-                      Thank You for Reaching Out
+                      Enquiry Received
                     </h3>
-                    <p className="text-[#9696A8] text-sm sm:text-base leading-relaxed max-w-md mb-8">
-                      We&apos;ve received your inquiry and project details. A partner from the TAVQO team will review them and get back to you within 24 hours.
+                    <p className="text-[#9696A8] text-sm sm:text-base leading-relaxed max-w-md mb-6 font-light">
+                      Thank you, <span className="text-white font-medium">{submittedData?.name}</span>. We&apos;ve received your project details and a team partner will follow up within 24 hours.
                     </p>
+
+                    {/* Submission Details Summary */}
+                    {submittedData && (
+                      <div className="w-full max-w-md p-5 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-left mb-8 space-y-3 text-xs font-sans">
+                        <div className="flex justify-between items-center text-white/50 border-b border-white/[0.06] pb-2">
+                          <span className="text-white/60">Project:</span>
+                          <span className="text-white font-medium">{submittedData.projectType}</span>
+                        </div>
+                        {submittedData.budget && (
+                          <div className="flex justify-between items-center text-white/50 border-b border-white/[0.06] pb-2">
+                            <span className="text-white/60">Budget:</span>
+                            <span className="text-white font-medium">{submittedData.budget}</span>
+                          </div>
+                        )}
+                        {submittedData.company && (
+                          <div className="flex justify-between items-center text-white/50 border-b border-white/[0.06] pb-2">
+                            <span className="text-white/60">Organisation:</span>
+                            <span className="text-white font-medium">{submittedData.company}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center text-white/50 pt-1">
+                          <span className="text-white/60">Confirmation:</span>
+                          <span className="text-[#8275FF] font-medium truncate ml-2">{submittedData.email}</span>
+                        </div>
+                      </div>
+                    )}
+
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/[0.06] border border-white/10 text-sm font-medium text-white hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/[0.06] border border-white/10 text-sm font-medium text-white hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer shadow-sm hover:shadow"
                     >
-                      Send Another Message
+                      Send Another Enquiry
                     </button>
                   </div>
                 ) : (
                   /* Main Contact Form */
-                  <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7">
+                  <form onSubmit={handleSubmit} noValidate className="space-y-6 sm:space-y-7">
                     <div>
                       <h2 className="text-2xl sm:text-[1.75rem] font-medium text-white mb-2">
                         Tell us about your project
@@ -335,11 +611,43 @@ export default function Contact() {
                       </p>
                     </div>
 
-                    {/* Row 1: Name and Organisation (Two Columns) */}
+                    {/* Honeypot Spam Protection (Hidden from real users) */}
+                    <input
+                      type="checkbox"
+                      name="botcheck"
+                      className="hidden"
+                      style={{ display: "none" }}
+                      tabIndex={-1}
+                      autoComplete="off"
+                      checked={formData.botcheck}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, botcheck: e.target.checked }))
+                      }
+                    />
+
+                    {/* Error Banner */}
+                    {submitStatus.type === "error" && (
+                      <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-xs sm:text-sm flex items-start gap-3 animate-in fade-in duration-300">
+                        <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-medium text-red-100">Unable to submit enquiry</p>
+                          <p className="text-red-300/80 mt-0.5 text-xs">{submitStatus.message}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSubmitStatus({ type: null, message: "" })}
+                          className="text-red-400/60 hover:text-red-200 transition-colors p-1 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Row 1: Full Name and Email Address (Required) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                       <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
-                          Your Name <span className="text-[#8275FF]">*</span>
+                        <label className="block text-sm font-sans font-normal text-white/80 mb-2">
+                          Full Name <span className="text-[#8275FF]">*</span>
                         </label>
                         <input
                           type="text"
@@ -347,29 +655,19 @@ export default function Contact() {
                           required
                           value={formData.name}
                           onChange={handleInputChange}
-                          placeholder="Enter Your Name "
-                          className="w-full bg-white/[0.02] border border-white/[0.08] focus:border-[#8275FF] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#8275FF]/50 rounded-xl px-4 py-3.5 text-white placeholder-white/25 text-sm transition-all"
+                          placeholder="Enter your name"
+                          className={`w-full font-sans font-normal bg-white/[0.02] border ${
+                            formErrors.name
+                              ? "border-red-500/60 focus:border-red-400 focus:ring-red-500/40"
+                              : "border-white/[0.08] focus:border-[#8275FF] focus:ring-[#8275FF]/50"
+                          } focus:bg-white/[0.05] focus:outline-none focus:ring-1 rounded-xl px-4 py-3.5 text-white placeholder-white/25 text-sm transition-all`}
                         />
+                        {formErrors.name && (
+                          <p className="text-xs text-red-400 mt-1.5 font-sans">{formErrors.name}</p>
+                        )}
                       </div>
                       <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
-                          Organisation / Company
-                        </label>
-                        <input
-                          type="text"
-                          name="organisation"
-                          value={formData.organisation}
-                          onChange={handleInputChange}
-                          placeholder="Enter your Organization/Company name"
-                          className="w-full bg-white/[0.02] border border-white/[0.08] focus:border-[#8275FF] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#8275FF]/50 rounded-xl px-4 py-3.5 text-white placeholder-white/25 text-sm transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Row 2: Email and Role Dropdown (Two Columns) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                      <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
+                        <label className="block text-sm font-sans font-normal text-white/80 mb-2">
                           Email Address <span className="text-[#8275FF]">*</span>
                         </label>
                         <input
@@ -378,119 +676,215 @@ export default function Contact() {
                           required
                           value={formData.email}
                           onChange={handleInputChange}
-                          placeholder="enter your email address"
-                          className="w-full bg-white/[0.02] border border-white/[0.08] focus:border-[#8275FF] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#8275FF]/50 rounded-xl px-4 py-3.5 text-white placeholder-white/25 text-sm transition-all"
+                          placeholder="Enter your email address"
+                          className={`w-full font-sans font-normal bg-white/[0.02] border ${
+                            formErrors.email
+                              ? "border-red-500/60 focus:border-red-400 focus:ring-red-500/40"
+                              : "border-white/[0.08] focus:border-[#8275FF] focus:ring-[#8275FF]/50"
+                          } focus:bg-white/[0.05] focus:outline-none focus:ring-1 rounded-xl px-4 py-3.5 text-white placeholder-white/25 text-sm transition-all`}
                         />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
-                          Your Role <span className="text-[#8275FF]">*</span>
-                        </label>
-                        <div className="relative">
-                          <select
-                            name="role"
-                            required
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            className="w-full bg-white/[0.02] border border-white/[0.08] focus:border-[#8275FF] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#8275FF]/50 rounded-xl px-4 py-3.5 text-white text-sm transition-all appearance-none cursor-pointer pr-10"
-                          >
-                            <option value="" disabled className="text-white/40 bg-[#090A12]">
-                              Select your role...
-                            </option>
-                            <option value="Founder / Executive" className="bg-[#090A12] text-white">
-                              Founder / Executive
-                            </option>
-                            <option value="Product Lead / Manager" className="bg-[#090A12] text-white">
-                              Product Lead / Manager
-                            </option>
-                            <option value="Engineering / Technical Director" className="bg-[#090A12] text-white">
-                              Engineering / Technical Director
-                            </option>
-                            <option value="Design / Creative Director" className="bg-[#090A12] text-white">
-                              Design / Creative Director
-                            </option>
-                            <option value="Brand / Marketing Director" className="bg-[#090A12] text-white">
-                              Brand / Marketing Director
-                            </option>
-                            <option value="Investor / Partner" className="bg-[#090A12] text-white">
-                              Investor / Partner
-                            </option>
-                            <option value="Other" className="bg-[#090A12] text-white">
-                              Other
-                            </option>
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/40">
-                            <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                            </svg>
-                          </div>
-                        </div>
+                        {formErrors.email && (
+                          <p className="text-xs text-red-400 mt-1.5 font-sans">{formErrors.email}</p>
+                        )}
                       </div>
                     </div>
 
-                    {/* Row 3: Optional Project Brief Attachment */}
-                    <div>
-                      <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
-                        Project Brief / Attachment (optional)
-                      </label>
-                      <div
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onClick={() => fileInputRef.current?.click()}
-                        className={`relative border border-dashed rounded-xl p-4 transition-all cursor-pointer text-center ${isDragging
-                          ? "border-[#8275FF] bg-[#8275FF]/10"
-                          : "border-white/10 hover:border-white/25 bg-white/[0.015] hover:bg-white/[0.03]"
-                          }`}
-                      >
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          className="hidden"
-                          onChange={handleFileSelect}
-                          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip"
-                        />
-                        {attachment ? (
-                          <div className="flex items-center justify-between px-2 py-1">
-                            <div className="flex items-center gap-2.5 text-left truncate">
-                              <FileText className="w-4 h-4 text-[#8275FF] shrink-0" />
-                              <div className="truncate">
-                                <p className="text-xs font-medium text-white truncate">{attachment.name}</p>
-                                <p className="text-[10px] text-white/40 font-mono">
-                                  {(attachment.size / 1024).toFixed(1)} KB
-                                </p>
-                              </div>
+                    {/* Row 2: Project Type (Required Dropdown) and Estimated Budget (Optional Dropdown) with Vibrant Colour Gradients */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 relative z-30">
+                      {/* Hidden inputs to preserve native form serialization */}
+                      <input type="hidden" name="projectType" value={formData.projectType} />
+                      <input type="hidden" name="budget" value={formData.budget} />
+
+                      {/* Project Type Custom Gradient Dropdown */}
+                      <div className={`relative ${projectTypeOpen ? "z-40" : "z-20"}`} ref={projectTypeRef}>
+                        <label className="block text-sm font-sans font-normal text-white/80 mb-2">
+                          Project Type <span className="text-[#8275FF]">*</span>
+                        </label>
+                        <div className="relative group">
+                          {/* Ambient Glowing Gradient Border */}
+                          <div
+                            aria-hidden="true"
+                            className={`absolute -inset-[1px] rounded-xl bg-gradient-to-r ${
+                              formErrors.projectType
+                                ? "from-red-500/90 via-red-400/60 to-red-500/90"
+                                : projectTypeOpen
+                                ? "from-[#8275FF] via-[#E056FD] to-[#6049E2] opacity-100 shadow-[0_0_24px_rgba(130,117,255,0.45)]"
+                                : "from-[#8275FF]/40 via-[#C084FC]/30 to-[#6049E2]/40 opacity-70 group-hover:opacity-100 group-hover:from-[#8275FF]/85 group-hover:via-[#E056FD]/75 group-hover:to-[#6049E2]/85 group-hover:shadow-[0_0_18px_rgba(130,117,255,0.3)]"
+                            } transition-all duration-300 pointer-events-none`}
+                          />
+                          {/* Interactive Trigger Button */}
+                          <button
+                            type="button"
+                            onClick={toggleProjectType}
+                            aria-haspopup="listbox"
+                            aria-expanded={projectTypeOpen}
+                            className={`relative w-full rounded-xl bg-gradient-to-br from-[#121326]/95 via-[#0D0E1A]/95 to-[#16142E]/95 backdrop-blur-xl px-4 py-3.5 text-left flex items-center justify-between text-sm transition-all focus:outline-none cursor-pointer ${
+                              projectTypeOpen ? "ring-1 ring-[#8275FF]/60" : ""
+                            }`}
+                          >
+                            <div className="truncate pr-2">
+                              {selectedProjectType ? (
+                                <span className="text-white font-medium truncate">
+                                  {selectedProjectType.label}
+                                </span>
+                              ) : (
+                                <span className="text-white/40 font-normal">Select project type...</span>
+                              )}
                             </div>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAttachment(null);
-                              }}
-                              className="p-1 hover:text-red-400 text-white/40 transition-colors"
-                              title="Remove file"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <ChevronDown
+                                className={`w-4 h-4 text-[#8275FF] transition-transform duration-300 ${
+                                  projectTypeOpen ? "rotate-180 text-white" : "group-hover:text-white"
+                                }`}
+                              />
+                            </div>
+                          </button>
+                        </div>
+
+                        {/* Floating Gradient Dropdown Menu */}
+                        {projectTypeOpen && (
+                          <div
+                            role="listbox"
+                            data-lenis-prevent="true"
+                            onWheel={(e) => e.stopPropagation()}
+                            className="absolute z-50 left-0 right-0 mt-2 rounded-2xl bg-[#0B0C18]/98 backdrop-blur-2xl border border-white/10 shadow-[0_25px_70px_rgba(0,0,0,0.9),0_0_35px_rgba(130,117,255,0.25)] p-2 max-h-60 overflow-y-auto overscroll-contain touch-pan-y [scrollbar-width:thin] [scrollbar-color:rgba(130,117,255,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#8275FF]/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#8275FF]/60 animate-in fade-in zoom-in-95 duration-200"
+                          >
+                            <div
+                              aria-hidden="true"
+                              className="h-0.5 bg-gradient-to-r from-transparent via-[#8275FF] to-transparent mb-1.5 opacity-80"
+                            />
+                            <div className="space-y-1">
+                              {PROJECT_TYPE_OPTIONS.map((opt) => {
+                                const isSelected = formData.projectType === opt.value;
+                                return (
+                                  <button
+                                    key={opt.value}
+                                    type="button"
+                                    role="option"
+                                    aria-selected={isSelected}
+                                    onClick={() => handleSelectProjectType(opt.value)}
+                                    className={`w-full text-left rounded-xl px-4 py-3 text-sm transition-all duration-200 flex items-center justify-between group cursor-pointer ${
+                                      isSelected
+                                        ? "bg-gradient-to-r from-[#8275FF]/30 via-[#6049E2]/25 to-transparent text-white font-medium border-l-2 border-[#8275FF]"
+                                        : "text-white/70 hover:text-white hover:bg-gradient-to-r hover:from-[#8275FF]/20 hover:via-[#A855F7]/15 hover:to-transparent"
+                                    }`}
+                                  >
+                                    <span className="truncate">{opt.label}</span>
+                                    {isSelected && <Check className="w-4 h-4 text-[#B5A1FF] shrink-0 ml-2" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center py-2.5">
-                            <Upload className="w-5 h-5 text-white/40 mb-1.5" />
-                            <p className="text-xs text-white/70">
-                              <span className="text-[#8275FF] font-medium">Upload project brief</span> or drag and drop
-                            </p>
-                            <p className="text-[10px] text-white/40 font-mono mt-0.5">
-                              PDF, DOC, PNG, JPG or ZIP up to 25MB
-                            </p>
+                        )}
+
+                        {formErrors.projectType && (
+                          <p className="text-xs text-red-400 mt-1.5 font-sans">{formErrors.projectType}</p>
+                        )}
+                      </div>
+
+                      {/* Estimated Budget Custom Gradient Dropdown */}
+                      <div className={`relative ${budgetOpen ? "z-40" : "z-10"}`} ref={budgetRef}>
+                        <label className="block text-sm font-sans font-normal text-white/80 mb-2">
+                          Estimated Budget <span className="text-white/40 text-xs font-normal tracking-normal">(optional)</span>
+                        </label>
+                        <div className="relative group">
+                          {/* Ambient Glowing Gradient Border */}
+                          <div
+                            aria-hidden="true"
+                            className={`absolute -inset-[1px] rounded-xl bg-gradient-to-r ${
+                              budgetOpen
+                                ? "from-[#6366F1] via-[#A855F7] to-[#EC4899] opacity-100 shadow-[0_0_24px_rgba(168,85,247,0.45)]"
+                                : "from-[#6049E2]/40 via-[#8275FF]/30 to-[#A855F7]/40 opacity-70 group-hover:opacity-100 group-hover:from-[#6366F1]/85 group-hover:via-[#A855F7]/75 group-hover:to-[#EC4899]/85 group-hover:shadow-[0_0_18px_rgba(168,85,247,0.3)]"
+                            } transition-all duration-300 pointer-events-none`}
+                          />
+                          {/* Interactive Trigger Button */}
+                          <button
+                            type="button"
+                            onClick={toggleBudget}
+                            aria-haspopup="listbox"
+                            aria-expanded={budgetOpen}
+                            className={`relative w-full rounded-xl bg-gradient-to-br from-[#121326]/95 via-[#0D0E1A]/95 to-[#16142E]/95 backdrop-blur-xl px-4 py-3.5 text-left flex items-center justify-between text-sm transition-all focus:outline-none cursor-pointer ${
+                              budgetOpen ? "ring-1 ring-[#A855F7]/60" : ""
+                            }`}
+                          >
+                            <div className="truncate pr-2">
+                              {selectedBudget ? (
+                                <span className="text-white font-medium truncate">
+                                  {selectedBudget.label}
+                                </span>
+                              ) : (
+                                <span className="text-white/40 font-normal">Select estimated budget (Optional)...</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <ChevronDown
+                                className={`w-4 h-4 text-[#8275FF] transition-transform duration-300 ${
+                                  budgetOpen ? "rotate-180 text-white" : "group-hover:text-white"
+                                }`}
+                              />
+                            </div>
+                          </button>
+                        </div>
+
+                        {/* Floating Gradient Dropdown Menu */}
+                        {budgetOpen && (
+                          <div
+                            role="listbox"
+                            data-lenis-prevent="true"
+                            onWheel={(e) => e.stopPropagation()}
+                            className="absolute z-50 left-0 right-0 mt-2 rounded-2xl bg-[#0B0C18]/98 backdrop-blur-2xl border border-white/10 shadow-[0_25px_70px_rgba(0,0,0,0.9),0_0_35px_rgba(168,85,247,0.25)] p-2 max-h-60 overflow-y-auto overscroll-contain touch-pan-y [scrollbar-width:thin] [scrollbar-color:rgba(168,85,247,0.4)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#A855F7]/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#A855F7]/60 animate-in fade-in zoom-in-95 duration-200"
+                          >
+                            <div
+                              aria-hidden="true"
+                              className="h-0.5 bg-gradient-to-r from-transparent via-[#A855F7] to-transparent mb-1.5 opacity-80"
+                            />
+                            <div className="space-y-1">
+                              {BUDGET_OPTIONS.map((opt) => {
+                                const isSelected = formData.budget === opt.value;
+                                return (
+                                  <button
+                                    key={opt.value}
+                                    type="button"
+                                    role="option"
+                                    aria-selected={isSelected}
+                                    onClick={() => handleSelectBudget(opt.value)}
+                                    className={`w-full text-left rounded-xl px-4 py-3 text-sm transition-all duration-200 flex items-center justify-between group cursor-pointer ${
+                                      isSelected
+                                        ? "bg-gradient-to-r from-[#A855F7]/30 via-[#6366F1]/25 to-transparent text-white font-medium border-l-2 border-[#A855F7]"
+                                        : "text-white/70 hover:text-white hover:bg-gradient-to-r hover:from-[#A855F7]/20 hover:via-[#6366F1]/15 hover:to-transparent"
+                                    }`}
+                                  >
+                                    <span className="truncate">{opt.label}</span>
+                                    {isSelected && <Check className="w-4 h-4 text-[#C084FC] shrink-0 ml-2" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Row 4: Message Textarea */}
+                    {/* Row 3: Company / Organisation (Optional) */}
                     <div>
-                      <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-2">
-                        Message <span className="text-[#8275FF]">*</span>
+                      <label className="block text-sm font-sans font-normal text-white/80 mb-2">
+                        Company / Organisation <span className="text-white/40 text-xs font-normal tracking-normal">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="company"
+                        value={formData.company}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Acme Corp, Horizon Labs"
+                        className="w-full font-sans font-normal bg-white/[0.02] border border-white/[0.08] focus:border-[#8275FF] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#8275FF]/50 rounded-xl px-4 py-3.5 text-white placeholder-white/25 text-sm transition-all"
+                      />
+                    </div>
+
+                    {/* Row 4: Project Description (Required Textarea) */}
+                    <div>
+                      <label className="block text-sm font-sans font-normal text-white/80 mb-2">
+                        Project Description <span className="text-[#8275FF]">*</span>
                       </label>
                       <textarea
                         name="message"
@@ -498,9 +892,16 @@ export default function Contact() {
                         rows={4}
                         value={formData.message}
                         onChange={handleInputChange}
-                        placeholder="Share details about your objectives, timeline, scope, or challenges..."
-                        className="w-full bg-white/[0.02] border border-white/[0.08] focus:border-[#8275FF] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#8275FF]/50 rounded-xl px-4 py-3.5 text-white placeholder-white/25 text-sm transition-all resize-none"
+                        placeholder="Share details about your objectives, timeline, scope, or key challenges..."
+                        className={`w-full font-sans font-normal bg-white/[0.02] border ${
+                          formErrors.message
+                            ? "border-red-500/60 focus:border-red-400 focus:ring-red-500/40"
+                            : "border-white/[0.08] focus:border-[#8275FF] focus:ring-[#8275FF]/50"
+                        } focus:bg-white/[0.05] focus:outline-none focus:ring-1 rounded-xl px-4 py-3.5 text-white placeholder-white/25 text-sm transition-all resize-none`}
                       />
+                      {formErrors.message && (
+                        <p className="text-xs text-red-400 mt-1.5 font-sans">{formErrors.message}</p>
+                      )}
                     </div>
 
                     {/* Row 5: Terms & Privacy Checkbox */}
@@ -510,20 +911,32 @@ export default function Contact() {
                           type="checkbox"
                           required
                           checked={agreedToTerms}
-                          onChange={(e) => setAgreedToTerms(e.target.checked)}
+                          onChange={(e) => {
+                            setAgreedToTerms(e.target.checked);
+                            if (formErrors.terms) {
+                              setFormErrors((prev) => {
+                                const next = { ...prev };
+                                delete next.terms;
+                                return next;
+                              });
+                            }
+                          }}
                           className="mt-0.5 w-4 h-4 rounded border-white/20 bg-white/5 text-[#8275FF] focus:ring-[#8275FF] focus:ring-offset-0 cursor-pointer accent-[#8275FF]"
                         />
                         <span className="text-xs text-[#9696A8] leading-normal group-hover:text-white/80 transition-colors">
                           I agree to the processing of personal data in accordance with TAVQO&apos;s Privacy Policy.
                         </span>
                       </label>
+                      {formErrors.terms && (
+                        <p className="text-xs text-red-400 mt-1.5 font-sans">{formErrors.terms}</p>
+                      )}
                     </div>
 
-                    {/* Row 6: Send Button */}
+                    {/* Row 6: Submit Button */}
                     <div>
                       <button
                         type="submit"
-                        disabled={isSubmitting || !agreedToTerms}
+                        disabled={isSubmitting}
                         className="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-[#6049E2] via-[#8275FF] to-[#6049E2] bg-[length:200%_auto] hover:bg-right transition-all duration-500 py-4 px-6 text-white text-sm font-medium shadow-[0_4px_24px_rgba(130,117,255,0.35)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? (
@@ -549,20 +962,8 @@ export default function Contact() {
         </div>
       </main>
 
-      {/* Studio Footer */}
-      <footer className="relative z-20 w-full py-10 px-6 sm:px-10 lg:px-[6.5vw] bg-[#040508] border-t border-white/[0.08] text-white/60 text-xs flex flex-col sm:flex-row items-center justify-between gap-4 font-mono mt-12 sm:mt-16 lg:mt-24">
-        <div className="flex items-center gap-3">
-          <span className="text-white font-sans font-bold tracking-[0.2em]">TΛVQO</span>
-          <span className="text-white/20">|</span>
-          <span>© {new Date().getFullYear()} TAVQO STUDIO. ALL RIGHTS RESERVED.</span>
-        </div>
-        <div className="flex items-center gap-6 text-[#8E8EA0] uppercase tracking-wider text-[11px]">
-          <a href="/" className="hover:text-white transition-colors">Home</a>
-          <a href="/about" className="hover:text-white transition-colors">About</a>
-          <a href="/#services" className="hover:text-white transition-colors">Services</a>
-          <a href="/contact" className="text-white font-bold transition-colors">Contact</a>
-        </div>
-      </footer>
+      {/* 3. Official TAVQO Studio Footer */}
+      <Footer />
     </div>
   );
 }

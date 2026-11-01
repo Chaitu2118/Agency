@@ -1,26 +1,34 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import Lenis from "lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navbar from "../components/Navbar";
 import AboutHero from "../components/AboutHero";
 import AboutEditorialIntro from "../components/AboutEditorialIntro";
 import AboutCapabilitiesSection from "../components/AboutCapabilitiesSection";
 import AboutCollaborationSection from "../components/AboutCollaborationSection";
-import AboutPeopleSection from "../components/AboutPeopleSection";
-import VerticalWheelCarousel from "../components/VerticalWheelCarousel";
-import { WHEEL_SLIDES } from "../data/wheelSlidesData";
+import Footer from "../components/Footer";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * TAVQO — About Page
  * 1. Global Navbar
- * 2. Cinematic full-width AboutHero section
+ * 2. Cinematic full-width AboutHero section (capsule-free)
  * 3. Spacious warm ivory (#F3F0E8) editorial introduction section
- * 4. Bold image-plus-editorial capabilities section (Electric Violet #5145D9)
- * 5. Pinned vertical 3D Ferris wheel presentation carousel
- * 6. Studio footer
+ * 4. Bold capabilities section (What We Build)
+ * 5. Built Through Collaboration Section (Smooth Scroll Dissolve Reveal with 4 stages & 3D WebGL centerpieces)
+ * 6. Official TAVQO Studio Footer
+ *
+ * Integrated with Lenis smooth scrolling and synchronized GSAP ticker for 60/120fps fluid transitions.
  */
 export default function About() {
-  // Set SEO and document metadata
+  const lenisRef = useRef(null);
+
+  // Set SEO metadata and initialize Lenis smooth scroll
   useEffect(() => {
     document.title = "About TAVQO — Creative Technology Studio";
+    window.scrollTo({ top: 0, behavior: "instant" });
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
@@ -28,6 +36,39 @@ export default function About() {
         "We build websites, applications, digital products and intelligent systems that transform ideas into meaningful digital experiences."
       );
     }
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 1.5,
+    });
+    lenisRef.current = lenis;
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    const updateLenis = (time) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(updateLenis);
+    gsap.ticker.lagSmoothing(0);
+
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 120);
+
+    return () => {
+      clearTimeout(refreshTimer);
+      gsap.ticker.remove(updateLenis);
+      lenis.destroy();
+      lenisRef.current = null;
+    };
   }, []);
 
   return (
@@ -54,29 +95,11 @@ export default function About() {
       {/* 4. Bold Editorial Capabilities Section */}
       <AboutCapabilitiesSection />
 
-      {/* 5. Built Through Collaboration Section (Liquid FlexCarousel) */}
+      {/* 5. Built Through Collaboration Section (Smooth Scroll Dissolve Reveal) */}
       <AboutCollaborationSection />
 
-      {/* 6. The People Around TAVQO Carousel Section */}
-      <AboutPeopleSection />
-
-      {/* 6. Pinned Vertical 3D Ferris Wheel Carousel */}
-      <VerticalWheelCarousel slides={WHEEL_SLIDES} />
-
-      {/* 6. Post-Pin Studio Footer */}
-      <footer className="relative z-20 w-full py-10 px-6 sm:px-10 lg:px-[6.5vw] bg-[#040508] border-t border-white/[0.08] text-white/60 text-xs flex flex-col sm:flex-row items-center justify-between gap-4 font-mono">
-        <div className="flex items-center gap-3">
-          <span className="text-white font-sans font-bold tracking-[0.2em]">TΛVQO</span>
-          <span className="text-white/20">|</span>
-          <span>© {new Date().getFullYear()} TAVQO STUDIO. ALL RIGHTS RESERVED.</span>
-        </div>
-        <div className="flex items-center gap-6 text-[#8E8EA0] uppercase tracking-wider text-[11px]">
-          <a href="/" className="hover:text-white transition-colors">Home</a>
-          <a href="/about" className="text-white font-bold transition-colors">About</a>
-          <a href="/#services" className="hover:text-white transition-colors">Services</a>
-          <a href="/#contact" className="hover:text-white transition-colors">Contact</a>
-        </div>
-      </footer>
+      {/* 6. Official TAVQO Studio Footer */}
+      <Footer />
     </div>
   );
 }

@@ -1475,6 +1475,10 @@ function __OriginkitBase_ClayRobot({
                 if (!wasActive && clock - lastActive > 3 && dropDone) startWave(ptrFloorX - walkX)
                 lastActive = clock
             } else if (p.glance > 0 && !rm) {
+                if (wasActive) {
+                    glanceYaw = 0
+                    glancePitch = 0
+                }
                 if (clock >= nextGlance) {
                     const home = rand() < 0.3
                     glanceYaw = home ? 0 : (rand() * 2 - 1) * 0.5
@@ -1519,6 +1523,28 @@ function __OriginkitBase_ClayRobot({
                 }
             } else {
                 blinkAt = -1
+            }
+
+            // Interactive 3D floating and mouse-responsive movement
+            if (canvas) {
+                if (rm) {
+                    canvas.style.transform = "none"
+                } else {
+                    const floatScale = 1 - Math.min(1, walkAmt * 0.8)
+                    const floatY = Math.sin(clock * 1.8) * 7.5 * floatScale
+                    const floatRotate = Math.sin(clock * 1.4) * 0.7 * floatScale
+
+                    const yawDeg = (yaw.x * 180) / Math.PI
+                    const pitchDeg = (pitch.x * 180) / Math.PI
+
+                    const leanZ = yawDeg * 0.16 + floatRotate
+                    const rotY = yawDeg * 0.20
+                    const tiltX = -pitchDeg * 0.28
+                    const shiftX = yaw.x * (p.walk ? 4 : 12)
+                    const shiftY = -pitch.x * 10
+
+                    canvas.style.transform = `translate3d(${shiftX.toFixed(2)}px, ${(floatY + shiftY).toFixed(2)}px, 0px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) rotateZ(${leanZ.toFixed(2)}deg)`
+                }
             }
 
             const busy =
@@ -1650,17 +1676,22 @@ function __OriginkitBase_ClayRobot({
             ptrSeen = true
             ptrNew = true
             if (e.pointerType === "touch") touchUntil = clock + 1.5
+            wake()
         }
         const onWinMove = (e: PointerEvent) => {
             ptrInPage = true
             record(e)
         }
         const onDocLeave = (e: MouseEvent) => {
-            if (!e.relatedTarget) ptrInPage = false
+            if (!e.relatedTarget) {
+                ptrInPage = false
+                wake()
+            }
         }
         const onBlur = () => {
             ptrInPage = false
             ptrInFrame = false
+            wake()
         }
         const onEnter = (e: PointerEvent) => {
             ptrInFrame = true
@@ -1668,6 +1699,7 @@ function __OriginkitBase_ClayRobot({
         }
         const onLeave = () => {
             ptrInFrame = false
+            wake()
         }
         const onDown = (e: PointerEvent) => {
             ptrInFrame = true
@@ -1680,6 +1712,7 @@ function __OriginkitBase_ClayRobot({
             const h = hopAt >= 0 ? clock - hopAt : 1e9
             if (h > HOP_CROUCH + HOP_AIR) hopAt = clock
             joyAt = clock
+            wake()
         }
         const onScroll = () => {
             scrolled = true
@@ -1745,8 +1778,11 @@ function __OriginkitBase_ClayRobot({
                 position: "relative",
                 width: "100%",
                 height: "100%",
-                aspectRatio: `${REF_W} / ${REF_H}`,
-                overflow: "hidden",
+                aspectRatio: style?.aspectRatio !== undefined ? style.aspectRatio : "auto",
+                overflow: "visible",
+                perspective: "1000px",
+                perspectiveOrigin: "center center",
+                transformStyle: "preserve-3d",
                 background: "transparent",
                 backgroundColor: "transparent",
                 touchAction: "pan-y",
@@ -1766,6 +1802,9 @@ function __OriginkitBase_ClayRobot({
                     background: "transparent",
                     backgroundColor: "transparent",
                     display: failed ? "none" : "block",
+                    transformOrigin: "50% 75%",
+                    transformStyle: "preserve-3d",
+                    willChange: "transform",
                 }}
             />
         </div>

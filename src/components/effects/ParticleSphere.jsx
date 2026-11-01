@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Shader, Particles } from "shaders/react";
 
 /**
@@ -34,7 +34,7 @@ export default function ParticleSphere({
   exposure = 1.22,
 }) {
   const [hasGpuError, setHasGpuError] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function ParticleSphere({
 
     // Detect reduced motion
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(motionQuery.matches);
+    // motion preference initialized in state
     const motionHandler = (e) => setPrefersReducedMotion(e.matches);
     motionQuery.addEventListener("change", motionHandler);
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ParticleCube from "./effects/ParticleCube";
@@ -476,7 +476,7 @@ export default function ServicesWithCube() {
   const cardsRef = useRef([]);
   const cubeWrapRef = useRef(null);
   const codeSymbolWrapRef = useRef(null);
-  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
+  // mobile state handled locally
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -631,7 +631,7 @@ export default function ServicesWithCube() {
         const scrollLeft = track.scrollLeft;
         const cardWidth = 320;
         const activeIdx = Math.min(5, Math.max(0, Math.round(scrollLeft / cardWidth)));
-        setMobileActiveIndex(activeIdx);
+        // active index handled directly below
 
         if (!cubeWrapRef.current || !codeSymbolWrapRef.current) return;
         if (activeIdx >= 3) {
@@ -677,7 +677,7 @@ export default function ServicesWithCube() {
       />
 
       <div className="w-full h-full max-w-[1720px] mx-auto flex flex-col lg:flex-row items-center px-6 sm:px-10 lg:px-12 relative z-10">
-        
+
         {/* ========================================================= */}
         {/* 1. LEFT ZONE: DEDICATED 3D PARTICLE VISUAL CENTERPIECE    */}
         {/* Services 1–3: ParticleCube | Services 4–6: ParticleCodeSymbol */}
@@ -696,7 +696,7 @@ export default function ServicesWithCube() {
 
             {/* Shared Visual Container: Seamless crossfade between Cube and Code Symbol */}
             <div className="w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] lg:w-[440px] lg:h-[440px] aspect-square flex items-center justify-center relative z-10">
-              
+
               {/* Visual 1: 3D Particle Cube (Services 1–3) */}
               <div
                 ref={cubeWrapRef}
@@ -723,7 +723,7 @@ export default function ServicesWithCube() {
         {/* 2. RIGHT ZONE: HEADER + STANDARDIZED CARDS TRACK          */}
         {/* ========================================================= */}
         <div className="flex-1 w-full h-full min-w-0 flex flex-col justify-between pt-8 sm:pt-12 lg:pt-28 pb-5 sm:pb-7 lg:pb-8 pl-0 lg:pl-4 relative">
-          
+
           {/* Top Section Header */}
           <div className="w-full flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6 pb-4 sm:pb-5 lg:pb-7 border-b border-white/10">
             <div>
@@ -824,7 +824,6 @@ export default function ServicesWithCube() {
 
           {/* Bottom Footer Info Bar */}
           <div className="w-full flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.18em] text-[#8E8E9F]/60 pt-3 border-t border-white/10">
-            <span>TAVQO DIGITAL STUDIO</span>
             <span className="hidden sm:inline">SCROLL TO NAVIGATE ALL SERVICES</span>
             <span>06 CAPABILITIES</span>
           </div>
