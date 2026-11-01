@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Lenis from "lenis";
 import gsap from "gsap";
@@ -10,18 +10,14 @@ import AverageIsExpensive from "./components/AverageIsExpensive";
 import ValuePropositionTrail from "./components/ValuePropositionTrail";
 import GoodFit from "./components/GoodFit";
 import Footer from "./components/Footer";
-import CinematicIntro from "./components/CinematicIntro";
-import TheTavqoLogo from "./components/TheTavqoLogo";
-import Preloader from "./components/Preloader";
-import About from "./pages/About";
+
+// Lazy-load secondary pages for optimal initial route performance
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 gsap.registerPlugin(ScrollTrigger);
 
 function HomePage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isHomepageRevealed, setIsHomepageRevealed] = useState(true);
-  const [introKey, setIntroKey] = useState(1);
-  const [isIntroRunning, setIsIntroRunning] = useState(false);
   const lenisRef = useRef(null);
 
   // Initialize Lenis smooth scroll and synchronize with GSAP ScrollTrigger
@@ -54,38 +50,6 @@ function HomePage() {
     };
   }, []);
 
-  // Pause Lenis scrolling during initial loading or logo intro replay
-  useEffect(() => {
-    if (!lenisRef.current) return;
-    if (isLoading || isIntroRunning) {
-      lenisRef.current.stop();
-    } else {
-      lenisRef.current.start();
-    }
-  }, [isLoading, isIntroRunning]);
-
-  // Preloader completion handler
-  const handlePreloaderComplete = useCallback(() => {
-    setIsLoading(false);
-  }, []);
-
-  // Triggered when logo begins transitioning toward navbar
-  const handleStartReveal = useCallback(() => {
-    setIsHomepageRevealed(true);
-  }, []);
-
-  // Triggered when intro overlay completes and finishes handoff
-  const handleIntroComplete = useCallback(() => {
-    setIsIntroRunning(false);
-  }, []);
-
-  // Replay intro anytime (via button, footer, or navbar click)
-  const handleReplayIntro = useCallback(() => {
-    setIsHomepageRevealed(false);
-    setIsIntroRunning(true);
-    setIntroKey((prev) => prev + 1);
-  }, []);
-
   return (
     <div
       className="relative min-h-screen text-[#F5F4FF] overflow-x-hidden bg-[#050508]"
@@ -93,23 +57,9 @@ function HomePage() {
         backgroundColor: "#050508",
       }}
     >
-      {/* 0. FULL-SCREEN LUXURY TYPOGRAPHY PRELOADER */}
-      {isLoading && <Preloader onComplete={handlePreloaderComplete} />}
-
-      {/* 1. THE TAVQO ORGANIC CINEMATIC BRAND INTRO (Available on replay) */}
-      {isIntroRunning && (
-        <CinematicIntro
-          key={introKey}
-          forcePlay={true}
-          onStartReveal={handleStartReveal}
-          onComplete={handleIntroComplete}
-        />
-      )}
-
-      {/* 2. THE TAVQO EDITORIAL LUXURY NAVBAR */}
+      {/* 1. THE TAVQO EDITORIAL LUXURY NAVBAR */}
       <Navbar
-        isRevealed={isHomepageRevealed}
-        onReplayIntro={handleReplayIntro}
+        isRevealed={true}
         onNavigate={(href) => {
           if (lenisRef.current) {
             const offset = href === "#hero" ? 0 : -50;
@@ -118,54 +68,41 @@ function HomePage() {
         }}
       />
 
-      {/* 3. MAIN HOMEPAGE CONTENT */}
-      <main
-        className={`transition-opacity duration-700 ease-out ${
-          isHomepageRevealed ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
+      {/* 2. MAIN HOMEPAGE CONTENT — Directly visible with zero artificial delay */}
+      <main className="opacity-100">
         {/* HERO SECTION */}
-        <Hero isRevealed={isHomepageRevealed} />
+        <Hero isRevealed={true} />
 
-        {/* ========================================================= */}
-        {/* SERVICES SECTION — Standardized 6 Services Showcase       */}
-        {/* ========================================================= */}
+        {/* SERVICES SECTION — Standardized 6 Services Showcase */}
         <Services />
 
-        {/* ========================================================= */}
-        {/* AVERAGE IS EXPENSIVE — Why TAVQO Showcase                 */}
-        {/* ========================================================= */}
+        {/* AVERAGE IS EXPENSIVE — Why TAVQO Showcase */}
         <AverageIsExpensive />
 
-        {/* ========================================================= */}
-        {/* VALUE PROPOSITION — Interactive Image Trail Editorial     */}
-        {/* ========================================================= */}
+        {/* VALUE PROPOSITION — Interactive Image Trail Editorial */}
         <ValuePropositionTrail />
 
-        {/* ========================================================= */}
-        {/* GOOD FIT — Process & Fit Showcase                         */}
-        {/* ========================================================= */}
+        {/* GOOD FIT — Process & Fit Showcase */}
         <GoodFit />
 
-        {/* ========================================================= */}
-        {/* FOOTER — Contact & Reference Design                       */}
-        {/* ========================================================= */}
-        <Footer onReplayIntro={handleReplayIntro} />
+        {/* FOOTER — Contact & Reference Design */}
+        <Footer />
       </main>
     </div>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="*" element={<HomePage />} />
-      </Routes>
+      <Suspense fallback={<div className="min-h-screen bg-[#050508]" />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
-
-export default App;
