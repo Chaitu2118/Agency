@@ -304,11 +304,12 @@ export default function Navbar({
           <a
             href={isContact ? "#" : "/contact"}
             onClick={handleCtaClick}
-            className={`group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[13px] font-sans font-medium tracking-[0.04em] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none cursor-pointer ${
+            className={`group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[13px] font-sans font-medium tracking-normal transition-all duration-300 active:scale-[0.98] focus-visible:outline-none cursor-pointer ${
               isLightMode
                 ? "bg-[#0E0F14] text-[#FAF9F6] border border-[#0E0F14] hover:bg-[#1C1D26] shadow-md"
                 : "text-white border border-white/20 hover:border-white/50 bg-black/20 hover:bg-white/5"
             }`}
+            style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
           >
             <span>Start Your Project</span>
             {/* Circular arrow badge */}
@@ -398,8 +399,9 @@ export default function Navbar({
                 <a
                   href={isContact ? "#" : "/contact"}
                   onClick={handleCtaClick}
-                  className="flex items-center justify-center w-full py-3 rounded-full bg-[#14141e] hover:bg-white/10 text-white border border-white/[0.15] text-[13.5px] font-sans font-medium transition-all cursor-pointer"
+                  className="flex items-center justify-center w-full py-3 rounded-full bg-[#14141e] hover:bg-white/10 text-white border border-white/[0.15] text-[13.5px] font-sans font-medium tracking-normal transition-all cursor-pointer"
                   style={{
+                    fontFamily: '"Plus Jakarta Sans", sans-serif',
                     boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.18)",
                   }}
                 >

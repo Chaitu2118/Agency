@@ -924,7 +924,17 @@ export default function Contact() {
                           className="mt-0.5 w-4 h-4 rounded border-white/20 bg-white/5 text-[#8275FF] focus:ring-[#8275FF] focus:ring-offset-0 cursor-pointer accent-[#8275FF]"
                         />
                         <span className="text-xs text-[#9696A8] leading-normal group-hover:text-white/80 transition-colors">
-                          I agree to the processing of personal data in accordance with TAVQO&apos;s Privacy Policy.
+                          I agree to the processing of personal data in accordance with TAVQO&apos;s{" "}
+                          <a
+                            href="/privacy-policy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#8275FF] hover:text-[#B5A1FF] underline underline-offset-2 transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Privacy Policy
+                          </a>
+                          .
                         </span>
                       </label>
                       {formErrors.terms && (

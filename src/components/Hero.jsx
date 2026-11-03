@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
  * 4. Central Headline: "Building Digital \n Solutions That Matter" with "Digital" & "Solutions" emphasized.
  * 5. Reserved central 3D particle sphere area with controlled contrast.
  * 6. Lower-left mission statement (max-w-[430px]) + Outlined Pill CTA ("Start Your Project ↗").
- * 7. Lower-right three compact metrics: 50+ (Projects Delivered), 100% (Client Satisfaction), 24/7 (Support Availability).
+ * 7. Lower-right core studio pillars: Creative Development, Client-Focused Solutions, End-to-End Development.
  * 8. Height: 100svh on desktop, 7vw gutters, zero cards, architectural precision.
  */
 export default function Hero({ isRevealed = true }) {
@@ -400,7 +400,8 @@ export default function Hero({ isRevealed = true }) {
           <div>
             <a
               href="#contact"
-              className="group inline-flex items-center gap-3.5 px-6 py-3.5 sm:px-7 sm:py-3.5 rounded-full text-[13.5px] font-sans font-medium tracking-[0.04em] text-white border border-[rgba(211,205,255,0.28)] hover:border-[#8E83FF] bg-gradient-to-r from-[#11112C] to-[#1a1748] transition-all duration-300 shadow-[0_0_20px_rgba(81,71,255,0.2)] hover:shadow-[0_0_30px_rgba(142,131,255,0.4)] active:scale-[0.98] focus-visible:outline-none"
+              className="group inline-flex items-center gap-3.5 px-6 py-3.5 sm:px-7 sm:py-3.5 rounded-full text-[13.5px] font-sans font-medium tracking-normal text-white border border-[rgba(211,205,255,0.28)] hover:border-[#8E83FF] bg-gradient-to-r from-[#11112C] to-[#1a1748] transition-all duration-300 shadow-[0_0_20px_rgba(81,71,255,0.2)] hover:shadow-[0_0_30px_rgba(142,131,255,0.4)] active:scale-[0.98] focus-visible:outline-none"
+              style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
             >
               <span>Start Your Project</span>
               <span className="w-6 h-6 rounded-full bg-white/15 group-hover:bg-[#8E83FF] flex items-center justify-center text-[12px] font-bold text-white transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
@@ -410,41 +411,32 @@ export default function Hero({ isRevealed = true }) {
           </div>
         </div>
 
-        {/* LOWER-RIGHT: Three Compact Business Metrics (Side-by-side layout) */}
+        {/* LOWER-RIGHT: Three Core Studio Pillars (Side-by-side layout) */}
         <div className="hero-metrics-wrap flex items-center gap-3 sm:gap-4 lg:gap-6 self-stretch md:self-end justify-between md:justify-end">
           {/* Metric 1 */}
-          <div className="hero-metric-item flex items-center gap-3">
-            <span className="font-sans text-[28px] sm:text-[32px] lg:text-[36px] font-semibold text-white leading-none tracking-tight">
-              50+
-            </span>
-            <span className="text-[11px] sm:text-[11.5px] lg:text-[12px] font-sans text-[#8E8E9F] leading-[1.25] text-left block">
-              Projects<br />Delivered
+          <div className="hero-metric-item flex items-center">
+            <span className="text-[12px] sm:text-[13px] lg:text-[13.5px] font-sans font-medium text-white/90 leading-tight tracking-[-0.01em]">
+              Creative Development
             </span>
           </div>
 
           {/* Divider 1 */}
-          <div className="h-8 sm:h-9 w-[1px] bg-white/20 shrink-0 mx-1 sm:mx-2 lg:mx-3" />
+          <div className="h-4 sm:h-5 w-[1px] bg-white/20 shrink-0 mx-1 sm:mx-2 lg:mx-3 hidden sm:block" />
 
           {/* Metric 2 */}
-          <div className="hero-metric-item flex items-center gap-3">
-            <span className="font-sans text-[28px] sm:text-[32px] lg:text-[36px] font-semibold text-white leading-none tracking-tight">
-              100%
-            </span>
-            <span className="text-[11px] sm:text-[11.5px] lg:text-[12px] font-sans text-[#8E8E9F] leading-[1.25] text-left block">
-              Client<br />Satisfaction
+          <div className="hero-metric-item flex items-center">
+            <span className="text-[12px] sm:text-[13px] lg:text-[13.5px] font-sans font-medium text-white/90 leading-tight tracking-[-0.01em]">
+              Client-Focused Solutions
             </span>
           </div>
 
           {/* Divider 2 */}
-          <div className="h-8 sm:h-9 w-[1px] bg-white/20 shrink-0 mx-1 sm:mx-2 lg:mx-3" />
+          <div className="h-4 sm:h-5 w-[1px] bg-white/20 shrink-0 mx-1 sm:mx-2 lg:mx-3 hidden sm:block" />
 
           {/* Metric 3 */}
-          <div className="hero-metric-item flex items-center gap-3">
-            <span className="font-sans text-[28px] sm:text-[32px] lg:text-[36px] font-semibold text-white leading-none tracking-tight">
-              24/7
-            </span>
-            <span className="text-[11px] sm:text-[11.5px] lg:text-[12px] font-sans text-[#8E8E9F] leading-[1.25] text-left block">
-              Support<br />Available
+          <div className="hero-metric-item flex items-center">
+            <span className="text-[12px] sm:text-[13px] lg:text-[13.5px] font-sans font-medium text-white/90 leading-tight tracking-[-0.01em]">
+              End-to-End Development
             </span>
           </div>
         </div>

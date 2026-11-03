@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
 /**
@@ -30,32 +31,97 @@ function XIcon({ className = "w-3.5 h-3.5" }) {
   );
 }
 
-// Actual TAVQO Website Navigation Links
+// Quick links matching exactly what is in the navbar
 const quickLinks = [
-  { label: "Home", href: "#hero" },
-  { label: "Services", href: "#services" },
-  { label: "Why TAVQO", href: "#why-tavqo" },
-  { label: "Process", href: "#good-fit" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Services", href: "/services" },
+  { label: "Contact", href: "/contact" },
 ];
 
+// Digital services all route to our Services page
 const serviceLinks = [
-  { label: "Websites & Digital Experiences", href: "#services" },
-  { label: "Mobile App Development", href: "#services" },
-  { label: "Product Engineering & Dashboards", href: "#services" },
-  { label: "AI & Intelligent Automation", href: "#services" },
-  { label: "IoT & Smart Systems", href: "#services" },
-  { label: "Immersive 3D Experiences", href: "#services" },
+  { label: "Websites & Digital Experiences", href: "/services" },
+  { label: "Mobile App Development", href: "/services" },
+  { label: "Product Engineering & Dashboards", href: "/services" },
+  { label: "AI & Intelligent Automation", href: "/services" },
+  { label: "IoT & Smart Systems", href: "/services" },
+  { label: "Immersive 3D Experiences", href: "/services" },
 ];
 
+// Explore links with Client Inquiries routing to Contact Us
 const exploreLinks = [
-  { label: "Client Inquiries", href: "mailto:hello@tavqo.com" },
-  { label: "Careers", href: "#footer" },
-  { label: "Privacy Policy", href: "#footer" },
-  { label: "Terms of Service", href: "#footer" },
+  { label: "Client Inquiries", href: "/contact" },
+  { label: "Careers", href: "/contact" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Service", href: "/terms" },
+  { label: "Disclaimer", href: "/disclaimer" },
 ];
 
 function FooterComponent() {
+  const navigate = useNavigate();
+
+  const handleLinkClick = (e, href) => {
+    if (!href) return;
+
+    if (href.startsWith("mailto:") || href.startsWith("http")) {
+      return; // let default action handle external links
+    }
+
+    e.preventDefault();
+
+    if (href === "/") {
+      if (window.location.pathname === "/") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/");
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return;
+    }
+
+    if (href === "/about") {
+      if (window.location.pathname === "/about") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/about");
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return;
+    }
+
+    if (href === "/services") {
+      if (window.location.pathname === "/services") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/services");
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return;
+    }
+
+    if (href === "/contact") {
+      if (window.location.pathname === "/contact") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/contact");
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return;
+    }
+
+    if (href.startsWith("#")) {
+      const el = document.querySelector(href);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+
+    navigate(href);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
   return (
     <footer
       id="footer"
@@ -113,7 +179,8 @@ function FooterComponent() {
           <div className="lg:col-span-4 lg:pr-8">
             {/* Brand Logo & Wordmark (T logo icon removed as requested) */}
             <a
-              href="#hero"
+              href="/"
+              onClick={(e) => handleLinkClick(e, "/")}
               className="inline-flex flex-col group focus-visible:outline-none"
               aria-label="TAVQO Home"
             >
@@ -171,9 +238,7 @@ function FooterComponent() {
             <ul className="space-y-0">
               {quickLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="group flex items-center justify-between py-2 border-b border-white/[0.06] text-[13px] font-sans text-[#9696A8] hover:text-white transition-colors"
+                  <a href={link.href} onClick={(e) => handleLinkClick(e, link.href)} className="group flex items-center justify-between py-2 border-b border-white/[0.06] text-[13px] font-sans text-[#9696A8] hover:text-white transition-colors"
                   >
                     <span>{link.label}</span>
                     <ChevronRight className="w-3 h-3 text-[#5A5A6E] group-hover:text-[#8275FF] group-hover:translate-x-0.5 transition-all duration-200" />
@@ -193,9 +258,7 @@ function FooterComponent() {
             <ul className="space-y-0">
               {serviceLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="group flex items-center justify-between py-2 border-b border-white/[0.06] text-[13px] font-sans text-[#9696A8] hover:text-white transition-colors"
+                  <a href={link.href} onClick={(e) => handleLinkClick(e, link.href)} className="group flex items-center justify-between py-2 border-b border-white/[0.06] text-[13px] font-sans text-[#9696A8] hover:text-white transition-colors"
                   >
                     <span>{link.label}</span>
                     <ChevronRight className="w-3 h-3 text-[#5A5A6E] group-hover:text-[#8275FF] group-hover:translate-x-0.5 transition-all duration-200" />
@@ -215,9 +278,7 @@ function FooterComponent() {
             <ul className="space-y-0">
               {exploreLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="group flex items-center justify-between py-2 border-b border-white/[0.06] text-[13px] font-sans text-[#9696A8] hover:text-white transition-colors"
+                  <a href={link.href} onClick={(e) => handleLinkClick(e, link.href)} className="group flex items-center justify-between py-2 border-b border-white/[0.06] text-[13px] font-sans text-[#9696A8] hover:text-white transition-colors"
                   >
                     <span>{link.label}</span>
                     <ChevronRight className="w-3 h-3 text-[#5A5A6E] group-hover:text-[#8275FF] group-hover:translate-x-0.5 transition-all duration-200" />
