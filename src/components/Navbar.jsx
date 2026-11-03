@@ -4,48 +4,49 @@ import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * TAVQO Dark-Luxury Capsule Island Navigation
- * Inspired by reference design:
+ * Features:
  * - Left: Abstract emblem mark + clean brand wordmark (TAVQO)
- * - Center: Floating dark-glass capsule island with animated active pill tab
- * - Right: Tactile dark pill CTA button ("Start Your Project") with precision rim light
+ * - Center: Floating glass capsule island with active indicator
+ * - Right: Tactile pill CTA button ("Start Your Project") with precision rim light
  * - Fully responsive with an elegant dark drawer on mobile
- * - Supports multi-page navigation (Home, About & Contact) without regressions
+ * - Multi-page navigation (Home, About, Services, Contact)
  */
 const navLinks = [
   { label: "Home", href: "#hero", pageHref: "/" },
   { label: "About", href: "/about", pageHref: "/about" },
-  { label: "Services", href: "#services", pageHref: "/#services" },
-  { label: "Projects", href: "#why-tavqo", pageHref: "/#why-tavqo" },
-  { label: "Insights", href: "#good-fit", pageHref: "/#good-fit" },
+  { label: "Services", href: "/services", pageHref: "/services" },
   { label: "Contact", href: "/contact", pageHref: "/contact" },
 ];
 
-export default function Navbar({ 
-  isRevealed = true, 
-  onReplayIntro, 
+export default function Navbar({
+  isRevealed = true,
   onNavigate,
-  currentRoute = "home" 
+  currentRoute = "home",
 }) {
-  const isAbout = currentRoute === "about" || (typeof window !== "undefined" && window.location.pathname.startsWith("/about"));
-  const isContact = currentRoute === "contact" || (typeof window !== "undefined" && window.location.pathname.startsWith("/contact"));
-  const [activeHref, setActiveHref] = useState(isAbout ? "/about" : isContact ? "/contact" : "#hero");
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const isAbout = currentRoute === "about" || pathname.startsWith("/about");
+  const isServices = currentRoute === "services" || pathname.startsWith("/services");
+  const isContact = currentRoute === "contact" || pathname.startsWith("/contact");
+  const isMultiPage = isAbout || isServices || isContact;
+
+  const [activeHref, setActiveHref] = useState(() => {
+    if (isContact) return "/contact";
+    if (isAbout) return "/about";
+    if (isServices) return "/services";
+    return "#hero";
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLightMode, setIsLightMode] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(isServices);
 
   const handleNavClick = (e, link) => {
     setIsMobileMenuOpen(false);
 
     // If navigating to /contact
-    if (link.href === "/contact" || link.pageHref === "/contact") {
+    if (link.href === "/contact" || link.pageHref === "/contact" || link.label === "Contact") {
       if (typeof window !== "undefined") {
         if (window.location.pathname === "/contact") {
           e.preventDefault();
-          const formEl = document.getElementById("inquiry-form");
-          if (formEl) {
-            formEl.scrollIntoView({ behavior: "smooth" });
-          } else {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }
+          window.scrollTo({ top: 0, behavior: "smooth" });
         } else {
           window.location.href = "/contact";
         }
@@ -54,7 +55,7 @@ export default function Navbar({
     }
 
     // If navigating to /about
-    if (link.href === "/about" || link.pageHref === "/about") {
+    if (link.href === "/about" || link.pageHref === "/about" || link.label === "About") {
       if (typeof window !== "undefined") {
         if (window.location.pathname === "/about") {
           e.preventDefault();
@@ -66,26 +67,21 @@ export default function Navbar({
       return;
     }
 
-    // If currently on /contact
-    if (isContact) {
-      if (link.label === "Home") {
-        window.location.href = "/";
-        return;
+    // If navigating to /services
+    if (link.href === "/services" || link.pageHref === "/services" || link.label === "Services") {
+      if (typeof window !== "undefined") {
+        if (window.location.pathname === "/services") {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          window.location.href = "/services";
+        }
       }
-      if (link.href === "/about") {
-        window.location.href = "/about";
-        return;
-      }
-      if (link.href.startsWith("#")) {
-        window.location.href = `/${link.href}`;
-        return;
-      }
-      window.location.href = link.pageHref || link.href;
       return;
     }
 
-    // If currently on /about
-    if (isAbout) {
+    // If currently on a subpage (/about, /services, /contact)
+    if (isMultiPage) {
       if (link.label === "Home") {
         window.location.href = "/";
         return;
@@ -122,7 +118,8 @@ export default function Navbar({
   };
 
   const handleLogoClick = (e) => {
-    if (isAbout || isContact) {
+    if (isMultiPage) {
+      e.preventDefault();
       window.location.href = "/";
     } else {
       handleNavClick(e, { label: "Home", href: "#hero", pageHref: "/" });
@@ -132,24 +129,16 @@ export default function Navbar({
   const handleCtaClick = (e) => {
     if (isContact) {
       e.preventDefault();
-      const formEl = document.getElementById("inquiry-form");
-      if (formEl) {
-        formEl.scrollIntoView({ behavior: "smooth" });
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
+      e.preventDefault();
       window.location.href = "/contact";
     }
   };
 
   // Active section tracking via scroll position
   useEffect(() => {
-    if (isAbout) {
-      setActiveHref("/about");
-      setIsLightMode(false);
-      return;
-    }
+    if (isContact || isAbout || isServices) return;
 
     if (isContact) {
       setActiveHref("/contact");
@@ -225,7 +214,7 @@ export default function Navbar({
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isAbout, isContact]);
+  }, [isAbout, isServices, isContact]);
 
   return (
     <>
@@ -240,7 +229,7 @@ export default function Navbar({
         {/* Left: TΛVQO Wordmark */}
         <div className="flex items-center shrink-0">
           <a
-            href={isAbout || isContact ? "/" : "#hero"}
+            href={isMultiPage ? "/" : "#hero"}
             onClick={handleLogoClick}
             className="group flex items-center focus-visible:outline-none cursor-pointer"
             aria-label="TAVQO Homepage"
@@ -257,7 +246,7 @@ export default function Navbar({
 
         {/* Center: Transparent Floating Navigation Row */}
         <nav
-          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-7 md:gap-9 lg:gap-11 text-[13px] sm:text-[13.5px] font-sans tracking-[0.04em] px-8 md:px-10 lg:px-12 py-2 rounded-full min-w-[520px] lg:min-w-[620px] transition-all duration-300 shadow-sm ${
+          className={`hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-6 md:gap-7 lg:gap-8 text-[13px] sm:text-[13.5px] font-sans tracking-[0.04em] px-7 md:px-8 lg:px-9 py-2 rounded-full min-w-[360px] lg:min-w-[410px] transition-all duration-300 shadow-sm ${
             isLightMode
               ? "bg-[#0E0F14]/[0.05] backdrop-blur-md border border-black/[0.08]"
               : "bg-white/[0.04] backdrop-blur-md border border-white/[0.10]"
@@ -265,11 +254,13 @@ export default function Navbar({
           aria-label="Main Navigation"
         >
           {navLinks.map((link) => {
-            const isActive = isAbout
-              ? (link.href === "/about" || link.pageHref === "/about")
-              : isContact
-              ? (link.href === "/contact" || link.pageHref === "/contact")
-              : (activeHref === link.href);
+            const isActive = isContact
+              ? (link.href === "/contact" || link.pageHref === "/contact" || link.label === "Contact")
+              : isAbout
+                ? (link.href === "/about" || link.pageHref === "/about" || link.label === "About")
+                : isServices
+                  ? (link.href === "/services" || link.pageHref === "/services" || link.label === "Services")
+                  : (activeHref === link.href);
 
             return (
               <a
@@ -282,8 +273,8 @@ export default function Navbar({
                       ? "text-[#0E0F14] font-semibold"
                       : "text-[#5A596E] hover:text-[#0E0F14]"
                     : isActive
-                    ? "text-white font-medium"
-                    : "text-[#9E9EB2] hover:text-white"
+                      ? "text-white font-medium"
+                      : "text-[#9E9EB2] hover:text-white"
                 }`}
               >
                 <span>{link.label}</span>
@@ -317,7 +308,7 @@ export default function Navbar({
         {/* Right: Outlined Pill CTA & Mobile Toggle */}
         <div className="flex items-center gap-3 shrink-0">
           <a
-            href={isContact ? "#inquiry-form" : "/contact"}
+            href={isContact ? "#" : "/contact"}
             onClick={handleCtaClick}
             className={`group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[13px] font-sans font-medium tracking-[0.04em] transition-all duration-300 active:scale-[0.98] focus-visible:outline-none cursor-pointer ${
               isLightMode
@@ -381,11 +372,13 @@ export default function Navbar({
             >
               <nav className="flex flex-col gap-1.5">
                 {navLinks.map((link) => {
-                  const isActive = isAbout
-                    ? (link.href === "/about" || link.pageHref === "/about")
-                    : isContact
-                    ? (link.href === "/contact" || link.pageHref === "/contact")
-                    : (activeHref === link.href);
+                  const isActive = isContact
+                    ? (link.href === "/contact" || link.pageHref === "/contact" || link.label === "Contact")
+                    : isAbout
+                      ? (link.href === "/about" || link.pageHref === "/about" || link.label === "About")
+                      : isServices
+                        ? (link.href === "/services" || link.pageHref === "/services" || link.label === "Services")
+                        : (activeHref === link.href);
 
                   return (
                     <a
@@ -409,7 +402,7 @@ export default function Navbar({
                 <div className="h-px bg-white/10 my-2" />
 
                 <a
-                  href={isContact ? "#inquiry-form" : "/contact"}
+                  href={isContact ? "#" : "/contact"}
                   onClick={handleCtaClick}
                   className="flex items-center justify-center w-full py-3 rounded-full bg-[#14141e] hover:bg-white/10 text-white border border-white/[0.15] text-[13.5px] font-sans font-medium transition-all cursor-pointer"
                   style={{

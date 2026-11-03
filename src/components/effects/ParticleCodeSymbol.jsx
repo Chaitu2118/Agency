@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 /**
@@ -21,7 +21,15 @@ export default function ParticleCodeSymbol({
   scale = 1.0,
 }) {
   const containerRef = useRef(null);
-  const [hasWebGL, setHasWebGL] = useState(true);
+  const [hasWebGL] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try {
+      const c = document.createElement("canvas");
+      return !!(c.getContext("webgl2") || c.getContext("webgl"));
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -38,7 +46,7 @@ export default function ParticleCodeSymbol({
       if (!gl) throw new Error("WebGL not supported");
     } catch (e) {
       console.warn("[ParticleCodeSymbol] WebGL unavailable:", e);
-      setHasWebGL(false);
+      // WebGL availability handled in state
       return;
     }
 
@@ -302,10 +310,12 @@ export default function ParticleCodeSymbol({
     container.addEventListener("touchend", onTouchEnd, { passive: true });
 
     // 7. 60fps Animation Loop: Holographic Floating with Circular Repulsion Ring Physics
-    let animationFrameId;
+    let animationFrameId = null;
+    let isVisible = false;
     let clock = new THREE.Clock();
 
     const animate = () => {
+      if (!isVisible) return;
       animationFrameId = requestAnimationFrame(animate);
 
       const elapsedTime = clock.getElapsedTime();
@@ -485,7 +495,21 @@ export default function ParticleCodeSymbol({
       renderer.render(scene, camera);
     };
 
-    animate();
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible) {
+          clock.start();
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = requestAnimationFrame(animate);
+        } else if (!isVisible && wasVisible) {
+          cancelAnimationFrame(animationFrameId);
+        }
+      },
+      { threshold: 0.02 }
+    );
+    visibilityObserver.observe(container);
 
     // 8. Responsive Resize Handler
     const handleResize = () => {
@@ -507,6 +531,7 @@ export default function ParticleCodeSymbol({
       container.removeEventListener("pointerleave", onPointerLeave);
       container.removeEventListener("touchmove", onTouchMove);
       container.removeEventListener("touchend", onTouchEnd);
+      visibilityObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
 
       geometry.dispose();

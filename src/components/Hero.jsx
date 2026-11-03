@@ -25,13 +25,13 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Hero({ isRevealed = true }) {
   const heroRef = useRef(null);
   const sphereWrapperRef = useRef(null);
-  const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
+  const [shouldReduceMotion, setShouldReduceMotion] = useState(() => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   // Check prefers-reduced-motion
   useEffect(() => {
     if (typeof window === "undefined") return;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setShouldReduceMotion(media.matches);
+    // motion preference initialized in state
     const handler = (e) => setShouldReduceMotion(e.matches);
     media.addEventListener("change", handler);
     return () => media.removeEventListener("change", handler);
