@@ -82,8 +82,17 @@ export default function OneVisionSection() {
               return (
                 <div
                   key={row.title}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setActiveRow(idx)}
                   onMouseEnter={() => setActiveRow(idx)}
-                  className="group py-3.5 sm:py-4 border-b border-black/[0.08] transition-colors duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveRow(idx);
+                    }
+                  }}
+                  className="group py-3.5 sm:py-4 border-b border-black/[0.08] transition-colors duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3 outline-none"
                 >
                   <h3
                     className={`font-sans font-bold text-sm sm:text-[14.5px] tracking-tight uppercase transition-colors duration-200 shrink-0 ${

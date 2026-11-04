@@ -22,7 +22,7 @@ export default function ValuePropositionTrail() {
   return (
     <section
       id="value-clarity"
-      className="relative z-20 w-full min-h-screen bg-[#000000] text-white overflow-hidden select-text border-t border-white/10 -mt-[100vh]"
+      className="relative z-20 w-full min-h-[300px] sm:min-h-screen bg-[#000000] text-white overflow-hidden select-text border-t-0 lg:border-t lg:border-white/10 mt-0 lg:-mt-[100vh]"
       style={{
         backgroundColor: "#000000",
       }}
@@ -35,10 +35,10 @@ export default function ValuePropositionTrail() {
         maxItems={9}
         rotationRange={34}
         imageClassName="w-32 rounded-xl md:w-44 shadow-[0_25px_60px_rgba(0,0,0,0.9)] border border-white/20"
-        className="flex min-h-[640px] sm:min-h-[740px] lg:min-h-[820px] items-center justify-center bg-[#000000] py-28 sm:py-36 px-6 sm:px-10 lg:px-16"
+        className="flex min-h-[300px] sm:min-h-[600px] lg:min-h-[820px] items-center justify-center bg-[#000000] py-10 xs:py-12 sm:py-24 lg:py-36 px-5 sm:px-10 lg:px-16"
       >
         <div className="max-w-[880px] mx-auto text-center pointer-events-none">
-          <p className="font-sans text-[22px] sm:text-[30px] md:text-[38px] lg:text-[44px] font-normal text-white leading-[1.32] tracking-[-0.02em] select-none">
+          <p className="font-sans text-[18px] xs:text-[22px] sm:text-[30px] md:text-[38px] lg:text-[44px] font-normal text-white leading-[1.32] tracking-[-0.02em] select-none">
             Before we think about layouts, animations,
             <br className="hidden sm:inline" /> or colors, we get clear on what
             makes your

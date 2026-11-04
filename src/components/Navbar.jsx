@@ -300,11 +300,11 @@ export default function Navbar({
         </nav>
 
         {/* Right: Outlined Pill CTA & Mobile Toggle */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <a
             href={isContact ? "#" : "/contact"}
             onClick={handleCtaClick}
-            className={`group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full text-[13px] font-sans font-medium tracking-normal transition-all duration-300 active:scale-[0.98] focus-visible:outline-none cursor-pointer ${
+            className={`group relative hidden sm:inline-flex items-center gap-2.5 sm:gap-3 px-4 sm:px-5 py-2.5 rounded-full text-[12.5px] sm:text-[13px] font-sans font-medium tracking-normal transition-all duration-300 active:scale-[0.98] focus-visible:outline-none cursor-pointer ${
               isLightMode
                 ? "bg-[#0E0F14] text-[#FAF9F6] border border-[#0E0F14] hover:bg-[#1C1D26] shadow-md"
                 : "text-white border border-white/20 hover:border-white/50 bg-black/20 hover:bg-white/5"
@@ -314,7 +314,7 @@ export default function Navbar({
             <span>Start Your Project</span>
             {/* Circular arrow badge */}
             <span
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shadow-xs ${
+              className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[11px] sm:text-[12px] font-bold transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shadow-xs ${
                 isLightMode
                   ? "bg-white/20 text-[#FAF9F6] group-hover:bg-white/30"
                   : "bg-[#D4CFFF] group-hover:bg-white text-[#050508]"
@@ -324,19 +324,19 @@ export default function Navbar({
             </span>
           </a>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button (Accessible 44px touch target) */}
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
-            className={`md:hidden flex items-center justify-center w-9 h-9 rounded-full transition-colors focus-visible:outline-none ${
+            className={`md:hidden flex items-center justify-center w-10 h-10 rounded-full transition-colors focus-visible:outline-none cursor-pointer ${
               isLightMode
-                ? "text-[#0E0F14] border border-[#0E0F14]/25 bg-black/5 hover:bg-black/10"
-                : "text-white border border-white/20 bg-[#090910] hover:bg-white/10"
+                ? "text-[#0E0F14] border border-[#0E0F14]/25 bg-black/5 hover:bg-black/10 active:bg-black/15"
+                : "text-white border border-white/20 bg-[#090910] hover:bg-white/10 active:bg-white/15"
             }`}
           >
-            {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </header>
@@ -380,7 +380,7 @@ export default function Navbar({
                       key={link.label}
                       href={link.href}
                       onClick={(e) => handleNavClick(e, link)}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl text-[14px] font-sans font-medium transition-colors cursor-pointer ${
+                      className={`flex items-center justify-between px-4 py-3.5 min-h-[46px] rounded-xl text-[14.5px] font-sans font-medium transition-colors cursor-pointer select-none active:bg-white/[0.08] ${
                         isActive
                           ? "text-white bg-[#1e1e26] border border-white/[0.14]"
                           : "text-[#88889a] hover:text-white hover:bg-white/[0.04]"
@@ -399,7 +399,7 @@ export default function Navbar({
                 <a
                   href={isContact ? "#" : "/contact"}
                   onClick={handleCtaClick}
-                  className="flex items-center justify-center w-full py-3 rounded-full bg-[#14141e] hover:bg-white/10 text-white border border-white/[0.15] text-[13.5px] font-sans font-medium tracking-normal transition-all cursor-pointer"
+                  className="flex items-center justify-center w-full min-h-[48px] py-3.5 rounded-full bg-[#14141e] hover:bg-white/10 active:bg-white/15 text-white border border-white/[0.15] text-[14px] font-sans font-medium tracking-normal transition-all cursor-pointer select-none"
                   style={{
                     fontFamily: '"Plus Jakarta Sans", sans-serif',
                     boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.18)",

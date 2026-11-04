@@ -84,6 +84,11 @@ export function ImageTrail({
     (event) => {
       onPointerMove?.(event);
 
+      // On touch devices, do not spawn trail cards during touch drags to prevent interfering with scrolling
+      if (event.pointerType === "touch") {
+        return;
+      }
+
       if (disabled || !normalizedImages.length || safeMaxItems === 0) {
         return;
       }

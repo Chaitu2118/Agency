@@ -118,7 +118,10 @@ export default function AboutCollaborationSection() {
     const pinWrapper = pinWrapperRef.current;
     if (!container || !pinWrapper) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    // DESKTOP (>= 1024px): Pinned Scroll Dissolve Sequence
+    mm.add("(min-width: 1024px)", () => {
       // Setup initial visual states for all 4 stages (GPU-accelerated opacity + transform, zero heavy CSS blur)
       stagesRef.current.forEach((stageEl, i) => {
         if (!stageEl) return;
@@ -365,9 +368,27 @@ export default function AboutCollaborationSection() {
 
       // Dedicated comfortable resting hold for Stage 04 before natural release
       tl.to({}, { duration: 0.5 }, 2.95);
-    }, container);
+    });
 
-    return () => ctx.revert();
+    // MOBILE & TABLET (< 1024px): Smooth scroll reveal without pinned traps
+    mm.add("(max-width: 1023px)", () => {
+      const cards = container.querySelectorAll(".mobile-stage-card");
+      if (cards.length) {
+        gsap.from(cards, {
+          y: 28,
+          opacity: 0,
+          stagger: 0.15,
+          duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: container,
+            start: "top 75%",
+          },
+        });
+      }
+    });
+
+    return () => mm.revert();
   }, [isReducedMotion]);
 
   return (
@@ -397,10 +418,10 @@ export default function AboutCollaborationSection() {
         <rect width="100%" height="100%" filter="url(#tavqo-process-grain)" />
       </svg>
 
-      {/* PINNED VIEWPORT WRAPPER FOR SCROLL DISSOLVE SEQUENCE */}
+      {/* PINNED VIEWPORT WRAPPER FOR SCROLL DISSOLVE SEQUENCE (DESKTOP >= 1024px) */}
       <div
         ref={pinWrapperRef}
-        className="relative flex min-h-screen w-full flex-col justify-center overflow-hidden px-6 sm:px-10 lg:px-16 py-10 sm:py-16"
+        className="hidden lg:flex relative min-h-screen w-full flex-col justify-center overflow-hidden px-10 lg:px-16 py-16"
       >
         {/* Ambient Gradient Background Glow */}
         <div
@@ -552,6 +573,70 @@ export default function AboutCollaborationSection() {
           </div>
         </main>
       </div>
+
+      {/* ========================================================= */}
+      {/* MOBILE & TABLET STAGES (< 1024px): Responsive flow        */}
+      {/* ========================================================= */}
+      {!isReducedMotion && (
+        <div className="flex lg:hidden flex-col gap-6 sm:gap-8 px-4 sm:px-8 py-14 relative z-10 w-full max-w-2xl mx-auto">
+          <div className="text-center mb-4">
+            <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#7A6CFF] font-semibold block mb-2">
+              OUR PROCESS
+            </span>
+            <h2 className="font-sans text-[28px] xs:text-[34px] sm:text-[40px] font-bold text-white tracking-tight">
+              Built Through Collaboration
+            </h2>
+          </div>
+
+          {STAGES.map((stage, idx) => (
+            <article
+              key={stage.step}
+              className="mobile-stage-card w-full rounded-[24px] bg-white/[0.03] border border-white/10 p-6 sm:p-8 flex flex-col gap-6"
+            >
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="font-mono text-xs font-semibold px-2.5 py-1 rounded-md bg-[#5145D9]/20 text-[#8275FF] border border-[#5145D9]/30">
+                    {stage.step} — {stage.tag}
+                  </span>
+                </div>
+                <h3 className="font-sans font-bold text-2xl sm:text-3xl text-white mb-2.5 leading-snug">
+                  {stage.headlineLead}{" "}
+                  <span className="font-instrument italic font-normal text-[#DDD8FF]">
+                    {stage.headlineAccent}
+                  </span>
+                </h3>
+                <p className="font-sans text-[14px] sm:text-[15px] text-[#A2A0B8] font-light leading-relaxed">
+                  {stage.description}
+                </p>
+              </div>
+
+              {/* Practical Activities */}
+              <div className="pt-4 border-t border-white/[0.08]">
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-[#7A6CFF] font-semibold block mb-2.5">
+                  WHAT HAPPENS
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {stage.activities.map((activity, aIdx) => (
+                    <div key={aIdx} className="flex items-center gap-2 text-xs sm:text-[13px] text-[#D8D5EE] font-light">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#5145D9] shrink-0" />
+                      <span>{activity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subtle Compact 3D Particle Visual */}
+              <div className="w-full aspect-square max-w-[200px] mx-auto flex items-center justify-center">
+                {idx < 2 ? (
+                  <ParticleCube className="w-full h-full" size={1.2} totalParticles={3500} />
+                ) : (
+                  <ParticleCodeSymbol className="w-full h-full" scale={0.9} totalParticles={3500} />
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
 
       {/* ========================================================= */}
       {/* ACCESSIBILITY FALLBACK FOR REDUCED MOTION (UNPINNED)      */}

@@ -207,13 +207,16 @@ function VerticalCapabilitiesSelector() {
     return () => window.removeEventListener("resize", handleResize);
   }, [updateOffset]);
 
-  // STICK WHAT WE BUILD UNTIL IT REACHES 08 IMMERSIVE 3D EXPERIENCES
+  // STICK WHAT WE BUILD UNTIL IT REACHES 08 IMMERSIVE 3D EXPERIENCES (DESKTOP ONLY)
   // Uses GSAP ScrollTrigger timeline with smooth scrub damping and entry/exit buffers
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+
+    // DESKTOP (>= 1024px): Pinned capabilities scrubber
+    mm.add("(min-width: 1024px)", () => {
       const pinDistance = (VERTICAL_SERVICES.length - 1) * 380;
       const scrollProxy = { progress: 0 };
 
@@ -237,10 +240,6 @@ function VerticalCapabilitiesSelector() {
         duration: 1,
         onUpdate: () => {
           const p = scrollProxy.progress;
-          // Calibrated buffers:
-          // [0.00 .. 0.08]: Entry settling buffer on 01 Web Development (~210px)
-          // [0.08 .. 0.86]: Stepped progression through the 8 capabilities
-          // [0.86 .. 1.00]: Outro buffer on 08 Immersive 3D Experiences (~370px)
           const ENTRY_BUFFER = 0.08;
           const EXIT_BUFFER = 0.14;
           const ACTIVE_RANGE = 1 - ENTRY_BUFFER - EXIT_BUFFER;
@@ -260,15 +259,20 @@ function VerticalCapabilitiesSelector() {
           setActiveIndex(nextIndex);
         },
       });
-    }, section);
+    });
 
-    return () => ctx.revert();
+    // MOBILE & TABLET (< 1024px): Interactive touch selector without pinned trap
+    mm.add("(max-width: 1023px)", () => {
+      scrollTriggerRef.current = null;
+    });
+
+    return () => mm.revert();
   }, []);
 
-  // Clicking a service smoothly scrolls to its pinned position within the timeline
+  // Clicking a service smoothly scrolls to its pinned position within the timeline on desktop
   const handleItemClick = (idx) => {
     setActiveIndex(idx);
-    if (scrollTriggerRef.current) {
+    if (scrollTriggerRef.current && window.innerWidth >= 1024) {
       const st = scrollTriggerRef.current;
       const ENTRY_BUFFER = 0.08;
       const EXIT_BUFFER = 0.14;
@@ -285,7 +289,7 @@ function VerticalCapabilitiesSelector() {
       ref={sectionRef}
       id="what-we-build"
       aria-label="What We Build — TAVQO Capabilities Selector"
-      className="relative w-full min-h-screen h-screen bg-white text-[#09090D] px-6 sm:px-10 lg:px-16 overflow-hidden select-none border-t border-black/[0.06] flex items-center justify-center pt-14 sm:pt-16 pb-6"
+      className="relative w-full min-h-screen lg:h-screen bg-white text-[#09090D] px-6 sm:px-10 lg:px-16 overflow-visible lg:overflow-hidden select-none border-t border-black/[0.06] flex items-center justify-center py-16 lg:py-0"
     >
       <div className="relative max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
         {/* Left Editorial Anchor Column */}

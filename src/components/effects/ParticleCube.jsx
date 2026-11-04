@@ -62,8 +62,9 @@ export default function ParticleCube({
       alpha: true,
       powerPreference: "high-performance",
     });
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
@@ -88,11 +89,10 @@ export default function ParticleCube({
     const particleTexture = new THREE.CanvasTexture(dotCanvas);
 
     // 4. Geometry Generation: Broad Volumetric Edges & Sides Only (Open faces)
-    const isMobile = window.innerWidth < 768;
     const actualTotal = prefersReducedMotion
-      ? Math.floor(totalParticles * 0.35)
+      ? Math.floor(totalParticles * 0.3)
       : isMobile
-        ? Math.floor(totalParticles * 0.65)
+        ? Math.min(4800, Math.floor(totalParticles * 0.38))
         : totalParticles;
 
     const positions = new Float32Array(actualTotal * 3);

@@ -32,6 +32,11 @@ export default function AverageIsExpensive() {
   const rightCard2Ref = useRef(null);
   const rightCard3Ref = useRef(null);
 
+  // Mobile curated card refs (Left, Center, Right)
+  const mobileCard1Ref = useRef(null);
+  const mobileCard2Ref = useRef(null);
+  const mobileCard3Ref = useRef(null);
+
   const orbitsRef = useRef(null);
 
   useEffect(() => {
@@ -41,14 +46,14 @@ export default function AverageIsExpensive() {
     const mm = gsap.matchMedia();
 
     // ------------------------------------------------------------------------
-    // DESKTOP & TABLET (>= 768px):
+    // DESKTOP (>= 1024px):
     // 1. Initial State: Only text visible, all images staged below viewport
     // 2. Phase 1 (Scroll): Images rise slowly from bottom to top into symmetrical framing
     // 3. Phase 2 (Hold): Stable presentation for reading
     // 4. Phase 3 (Exit): ALL images exit upwards at once, canvas fades to black,
     //    and "Before we think" directly rises into view with ZERO white gap.
     // ------------------------------------------------------------------------
-    mm.add("(min-width: 768px)", () => {
+    mm.add("(min-width: 1024px)", () => {
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (prefersReduced) {
         gsap.set(
@@ -239,132 +244,71 @@ export default function AverageIsExpensive() {
     });
 
     // ------------------------------------------------------------------------
-    // MOBILE (< 768px):
-    // Smooth responsive bottom-to-top rise and synchronized direct exit to next section
+    // MOBILE & TABLET (< 1024px):
+    // Naturally sized, fully responsive scroll-driven choreography.
+    // Zero pinned scroll trap, zero merging, perfectly proportional on mobile!
     // ------------------------------------------------------------------------
-    mm.add("(max-width: 767px)", () => {
+    mm.add("(max-width: 1023px)", () => {
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (prefersReduced) {
-        gsap.set(
-          [
-            leftCard1Ref.current,
-            leftCard2Ref.current,
-            leftCard3Ref.current,
-            rightCard1Ref.current,
-            rightCard2Ref.current,
-            rightCard3Ref.current,
-          ],
-          { opacity: 1, y: 0, x: 0 }
-        );
-        gsap.set(textContainerRef.current, { opacity: 1, y: 0 });
+        gsap.set([mobileCard1Ref.current, mobileCard2Ref.current, mobileCard3Ref.current], {
+          opacity: 1,
+          y: 0,
+        });
         return;
       }
 
-      const mobileTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: "+=1800",
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // Initial Mobile Staging
-      gsap.set([leftCard3Ref.current, rightCard3Ref.current], {
-        y: "40vh",
-        opacity: 0,
-        rotateY: (i) => (i === 0 ? 5 : -5),
-        transformPerspective: 800,
-        transformOrigin: "center center",
-      });
-
-      gsap.set([leftCard2Ref.current, rightCard2Ref.current], {
-        y: "70vh",
-        opacity: 0,
-        rotateY: (i) => (i === 0 ? 5 : -5),
-        transformPerspective: 800,
-        transformOrigin: "center center",
-      });
-
-      gsap.set([leftCard1Ref.current, rightCard1Ref.current], {
-        y: "105vh",
-        opacity: 0,
-        rotateY: (i) => (i === 0 ? 5 : -5),
-        transformPerspective: 800,
-        transformOrigin: "center center",
-      });
-
-      gsap.set(textContainerRef.current, { y: 0, opacity: 1 });
-      gsap.set(orbitsRef.current, { opacity: 0.25 });
-      gsap.set(washRef.current, { opacity: 0.8 });
-      gsap.set(section, { backgroundColor: "#FAF9F6" });
-
-      // Mobile Phase 1: Text hold
-      mobileTl.to({}, { duration: 0.08 }, 0);
-
-      // Mobile Phase 2: Bottom to top rise
-      mobileTl.to(
-        [leftCard3Ref.current, rightCard3Ref.current],
-        { y: 0, opacity: 1, ease: "power2.out", duration: 0.22 },
-        0.08
-      );
-
-      mobileTl.to(
-        [leftCard2Ref.current, rightCard2Ref.current],
-        { y: 0, opacity: 1, ease: "power2.out", duration: 0.22 },
-        0.15
-      );
-
-      mobileTl.to(
-        [leftCard1Ref.current, rightCard1Ref.current],
-        { y: 0, opacity: 1, ease: "power2.out", duration: 0.22 },
-        0.22
-      );
-
-      mobileTl.to(orbitsRef.current, { opacity: 0.8, duration: 0.36 }, 0.08);
-
-      // Mobile Phase 3: Hold
-      mobileTl.to({}, { duration: 0.20 }, 0.44);
-
-      // Mobile Phase 4: All exit at once & canvas transitions to black
-      const allCards = [
-        leftCard1Ref.current,
-        leftCard2Ref.current,
-        leftCard3Ref.current,
-        rightCard1Ref.current,
-        rightCard2Ref.current,
-        rightCard3Ref.current,
-      ];
-
-      mobileTl.to(
-        allCards,
+      // Smooth scroll-driven scrub as user reaches the section
+      gsap.fromTo(
+        mobileCard2Ref.current,
+        { y: 35, opacity: 0, scale: 0.94 },
         {
-          y: "-110vh",
-          opacity: 0,
-          ease: "power2.in",
-          duration: 0.34,
-          stagger: 0,
-        },
-        0.64
+          y: -6,
+          opacity: 1,
+          scale: 1.04,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: textContainerRef.current,
+            start: "top 85%",
+            end: "center 55%",
+            scrub: 0.8,
+          },
+        }
       );
 
-      mobileTl.to(
-        textContainerRef.current,
+      gsap.fromTo(
+        mobileCard1Ref.current,
+        { y: 40, opacity: 0, rotate: -5 },
         {
-          y: -50,
-          opacity: 0,
-          ease: "power2.in",
-          duration: 0.26,
-        },
-        0.64
+          y: 0,
+          opacity: 1,
+          rotate: -2.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: textContainerRef.current,
+            start: "top 85%",
+            end: "center 55%",
+            scrub: 0.8,
+          },
+        }
       );
 
-      mobileTl.to(orbitsRef.current, { opacity: 0, duration: 0.20 }, 0.64);
-      mobileTl.to(washRef.current, { opacity: 0, duration: 0.26 }, 0.64);
-      mobileTl.to(section, { backgroundColor: "#000000", duration: 0.30 }, 0.64);
+      gsap.fromTo(
+        mobileCard3Ref.current,
+        { y: 40, opacity: 0, rotate: 5 },
+        {
+          y: 0,
+          opacity: 1,
+          rotate: 2.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: textContainerRef.current,
+            start: "top 85%",
+            end: "center 55%",
+            scrub: 0.8,
+          },
+        }
+      );
     });
 
     return () => {
@@ -376,7 +320,7 @@ export default function AverageIsExpensive() {
     <section
       id="average-is-expensive"
       ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden select-text"
+      className="relative w-full py-12 xs:py-16 sm:py-20 lg:py-0 lg:h-screen flex flex-col justify-center items-center overflow-hidden select-text"
       style={{
         backgroundColor: "#FAF9F6", // Warm Ivory clean editorial canvas
         color: "#0E0F14",
@@ -395,11 +339,11 @@ export default function AverageIsExpensive() {
         }}
       />
 
-      {/* Subtle Central Orbital Graphic (clean, no text, no crosshairs) */}
+      {/* Subtle Central Orbital Graphic (clean, no text, no crosshairs, desktop only) */}
       <div
         ref={orbitsRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[2] select-none will-change-transform"
+        className="hidden lg:block pointer-events-none absolute inset-0 z-[2] select-none will-change-transform"
       >
         <svg
           className="w-full h-full"
@@ -422,10 +366,11 @@ export default function AverageIsExpensive() {
 
       {/* =================================================================== */}
       {/* LEFT COLUMN: 3 CARDS ALIGNED IN ORDER (TOP, MIDDLE, BOTTOM)        */}
+      {/* Visible on Desktop (lg >= 1024px)                                   */}
       {/* =================================================================== */}
       <div
         aria-hidden="true"
-        className="absolute inset-y-0 left-[2vw] sm:left-[3vw] lg:left-[4vw] xl:left-[5vw] z-10 pointer-events-none flex flex-col justify-between py-[7vh] sm:py-[8vh] w-[130px] sm:w-[170px] md:w-[200px] lg:w-[230px] xl:w-[260px]"
+        className="hidden lg:flex absolute inset-y-0 left-[2vw] sm:left-[3vw] lg:left-[4vw] xl:left-[5vw] z-10 pointer-events-none flex-col justify-between py-[7vh] sm:py-[8vh] w-[130px] sm:w-[170px] md:w-[200px] lg:w-[230px] xl:w-[260px]"
       >
         {/* Card 1 (Top Left): Golden Dunes */}
         <div
@@ -470,10 +415,11 @@ export default function AverageIsExpensive() {
       {/* =================================================================== */}
       {/* RIGHT COLUMN: 3 CARDS ALIGNED IN ORDER (TOP, MIDDLE, BOTTOM)       */}
       {/* Exactly symmetrical and aligned with the left column               */}
+      {/* Visible on Desktop (lg >= 1024px)                                   */}
       {/* =================================================================== */}
       <div
         aria-hidden="true"
-        className="absolute inset-y-0 right-[2vw] sm:right-[3vw] lg:right-[4vw] xl:right-[5vw] z-10 pointer-events-none flex flex-col justify-between py-[7vh] sm:py-[8vh] w-[130px] sm:w-[170px] md:w-[200px] lg:w-[230px] xl:w-[260px]"
+        className="hidden lg:flex absolute inset-y-0 right-[2vw] sm:right-[3vw] lg:right-[4vw] xl:right-[5vw] z-10 pointer-events-none flex-col justify-between py-[7vh] sm:py-[8vh] w-[130px] sm:w-[170px] md:w-[200px] lg:w-[230px] xl:w-[260px]"
       >
         {/* Card 1 (Top Right): Iridescent Chrome Face */}
         <div
@@ -516,22 +462,22 @@ export default function AverageIsExpensive() {
       </div>
 
       {/* =================================================================== */}
-      {/* FIXED CENTER TEXT: PURE REQUESTED COPY (NO ADDITIONAL AI TEXT)     */}
-      {/* Anchored in the open center corridor between left and right columns */}
+      {/* CENTER TEXT + MOBILE CARDS TRIPTYCH                                */}
+      {/* Relative flow on mobile/tablet, centered corridor on desktop       */}
       {/* =================================================================== */}
       <div
         ref={textContainerRef}
-        className="absolute inset-0 z-30 pointer-events-none flex flex-col items-center justify-center px-6 text-center"
+        className="relative lg:absolute inset-0 z-30 pointer-events-none flex flex-col items-center justify-center px-4 sm:px-6 text-center w-full"
       >
-        <div className="w-full max-w-[520px] sm:max-w-[600px] lg:max-w-[680px] flex flex-col items-center">
+        <div className="w-full max-w-[360px] xs:max-w-[420px] md:max-w-[500px] lg:max-w-[680px] flex flex-col items-center mx-auto">
           {/* Monumental Headline */}
           <h2
             ref={headlineRef}
-            className="font-serif text-[38px] sm:text-[50px] md:text-[62px] lg:text-[72px] xl:text-[80px] font-normal leading-[1.08] tracking-[-0.025em] text-[#0E0F14] select-none text-center"
+            className="font-serif text-[24px] xs:text-[28px] sm:text-[36px] md:text-[48px] lg:text-[72px] xl:text-[80px] font-normal leading-[1.12] tracking-[-0.025em] text-[#0E0F14] select-none text-center"
           >
             <span className="block">Digital Solutions.</span>
             <span
-              className="block italic font-light text-[#5953E2] drop-shadow-[0_4px_24px_rgba(89,83,226,0.22)] mt-1 sm:mt-1.5"
+              className="block italic font-light text-[#5953E2] drop-shadow-[0_4px_24px_rgba(89,83,226,0.22)] mt-0.5 sm:mt-1.5"
               style={{
                 fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
                 fontStyle: "italic",
@@ -544,10 +490,37 @@ export default function AverageIsExpensive() {
           {/* Subtitle */}
           <p
             ref={subtitleRef}
-            className="mt-5 sm:mt-6 font-sans text-[15px] sm:text-[17px] md:text-[18px] lg:text-[19px] font-normal text-[#383946] tracking-[-0.01em] max-w-[540px] select-none leading-relaxed text-center"
+            className="mt-2.5 xs:mt-3 sm:mt-4 font-sans text-[12.5px] xs:text-[13.5px] sm:text-[15px] md:text-[17px] lg:text-[19px] font-normal text-[#383946] tracking-[-0.01em] max-w-[340px] xs:max-w-[420px] select-none leading-relaxed text-center"
           >
             Strategic engineering and elevated design for businesses ready to innovate, scale, and lead.
           </p>
+
+          {/* Mobile Curated Visuals Row (Visible on mobile < 1024px only, animated on scroll) */}
+          <div className="flex lg:hidden items-center justify-center gap-2.5 xs:gap-3.5 mt-4 xs:mt-6 w-full max-w-[320px] xs:max-w-[360px] pointer-events-auto">
+            {/* Card 1: Left Card (Golden Dunes) */}
+            <div
+              ref={mobileCard1Ref}
+              className="flex-1 aspect-[4/5] rounded-xl overflow-hidden shadow-md border border-[#0E0F14]/10 will-change-transform opacity-0"
+            >
+              <img src={goldenDunes} alt="Golden Dunes" className="w-full h-full object-cover" />
+            </div>
+
+            {/* Card 2: Center Card (Geometric Plaza) - Elevated focal card */}
+            <div
+              ref={mobileCard2Ref}
+              className="flex-1 aspect-[4/5] rounded-xl overflow-hidden shadow-xl border border-[#0E0F14]/12 will-change-transform z-10 opacity-0"
+            >
+              <img src={geometricPlaza} alt="Geometric Plaza" className="w-full h-full object-cover" />
+            </div>
+
+            {/* Card 3: Right Card (Blue Resin Hand) */}
+            <div
+              ref={mobileCard3Ref}
+              className="flex-1 aspect-[4/5] rounded-xl overflow-hidden shadow-md border border-[#0E0F14]/10 will-change-transform opacity-0"
+            >
+              <img src={blueResinHand} alt="Blue Resin Hand" className="w-full h-full object-cover" />
+            </div>
+          </div>
         </div>
       </div>
     </section>

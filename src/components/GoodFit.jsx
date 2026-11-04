@@ -52,33 +52,32 @@ export default function GoodFit() {
 
     const mm = gsap.matchMedia();
 
-    // ------------------------------------------------------------------------
-    // DESKTOP & TABLET (>= 768px):
-    // 71Three Exact Recreated Interaction:
-    // 1. Heading is centered alone in the viewport (Screenshot 1).
-    // 2. Card 1 glides up smoothly from the bottom to center (Screenshot 2).
-    // 3. Card 2 glides up smoothly from bottom to foreground, Card 1 peeks top (Screenshot 3).
-    // 4. Card 3 glides up smoothly from bottom to foreground, Card 1 & 2 peek top (Screenshot 4).
-    // ------------------------------------------------------------------------
-    mm.add("(min-width: 768px)", () => {
+    // Reusable factory for the scroll-driven stacking card choreography
+    const createScrollDeckTimeline = ({ endDistance, peekY1, peekY2, scrubSpeed }) => {
       const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (prefersReduced) return;
+      if (prefersReduced) {
+        gsap.set([card1Ref.current, card2Ref.current, card3Ref.current], {
+          y: 0,
+          scale: 1,
+          opacity: 1,
+        });
+        return;
+      }
 
       const masterTl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: "+=2600",
+          end: `+=${endDistance}`,
           pin: true,
-          scrub: 1.1,
+          scrub: scrubSpeed,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
 
       // INITIAL STAGING:
-      // Heading is centered in the screen.
-      // All 3 cards start completely below the viewport!
+      // All 3 cards start completely below the viewport
       gsap.set(card1Ref.current, {
         y: "115vh",
         scale: 1,
@@ -102,11 +101,9 @@ export default function GoodFit() {
       });
 
       // STAGE 0: Initial rest hold on the heading alone (0.00 -> 0.08)
-      // Matches Screenshot 1: Heading centered with nothing else on screen!
       masterTl.to({}, { duration: 0.08 }, 0);
 
-      // STAGE 1: Card 1 glides up smoothly from the bottom into the exact center (0.08 -> 0.32)
-      // Matches Screenshot 2: Card 1 covers the center of the heading!
+      // STAGE 1: Card 1 glides up smoothly into center (0.08 -> 0.32)
       masterTl.to(
         card1Ref.current,
         {
@@ -120,8 +117,7 @@ export default function GoodFit() {
       // STAGE 2: Rest hold on Card 1 for comfortable reading (0.32 -> 0.42)
       masterTl.to({}, { duration: 0.10 }, 0.32);
 
-      // STAGE 3: Card 2 glides up smoothly from bottom into foreground (0.42 -> 0.66)
-      // Matches Screenshot 3: Card 2 lands on top, Card 1 peeks cleanly above!
+      // STAGE 3: Card 2 glides up to foreground, Card 1 peeks top (0.42 -> 0.66)
       masterTl.to(
         card2Ref.current,
         {
@@ -136,7 +132,7 @@ export default function GoodFit() {
         card1Ref.current,
         {
           scale: 0.94,
-          y: -34,
+          y: peekY1,
           filter: "brightness(0.75)",
           ease: "power2.out",
           duration: 0.24,
@@ -147,8 +143,7 @@ export default function GoodFit() {
       // STAGE 4: Rest hold on Card 2 for comfortable reading (0.66 -> 0.74)
       masterTl.to({}, { duration: 0.08 }, 0.66);
 
-      // STAGE 5: Card 3 glides up smoothly from bottom into foreground (0.74 -> 0.94)
-      // Matches Screenshot 4: Card 3 lands on top, Card 2 & Card 1 peek above in physical deck!
+      // STAGE 5: Card 3 glides up to foreground, Cards 2 & 1 peek top in physical deck (0.74 -> 0.94)
       masterTl.to(
         card3Ref.current,
         {
@@ -163,7 +158,7 @@ export default function GoodFit() {
         card2Ref.current,
         {
           scale: 0.94,
-          y: -34,
+          y: peekY1,
           filter: "brightness(0.75)",
           ease: "power2.out",
           duration: 0.20,
@@ -175,7 +170,7 @@ export default function GoodFit() {
         card1Ref.current,
         {
           scale: 0.88,
-          y: -62,
+          y: peekY2,
           filter: "brightness(0.55)",
           ease: "power2.out",
           duration: 0.20,
@@ -185,14 +180,36 @@ export default function GoodFit() {
 
       // STAGE 6: Smooth final hold on 3-card stack before unpinning (0.94 -> 1.00)
       masterTl.to({}, { duration: 0.06 }, 0.94);
+    };
+
+    // Desktop (>= 1024px): Full desktop travel and depth
+    mm.add("(min-width: 1024px)", () => {
+      createScrollDeckTimeline({
+        endDistance: 2400,
+        peekY1: -34,
+        peekY2: -62,
+        scrubSpeed: 1.1,
+      });
     });
 
-    // ------------------------------------------------------------------------
-    // MOBILE (< 768px):
-    // Responsive card stack layout
-    // ------------------------------------------------------------------------
+    // Tablet (768px - 1023px): Smooth tablet scroll travel
+    mm.add("(min-width: 768px) and (max-width: 1023px)", () => {
+      createScrollDeckTimeline({
+        endDistance: 1900,
+        peekY1: -30,
+        peekY2: -54,
+        scrubSpeed: 1.0,
+      });
+    });
+
+    // Mobile (< 768px): Calibrated scroll-driven tactile card stack for phones
     mm.add("(max-width: 767px)", () => {
-      // Clean mobile presentation
+      createScrollDeckTimeline({
+        endDistance: 1100,
+        peekY1: -20,
+        peekY2: -38,
+        scrubSpeed: 0.85,
+      });
     });
 
     return () => {
@@ -204,12 +221,13 @@ export default function GoodFit() {
     <section
       id="good-fit"
       ref={sectionRef}
-      className="relative w-full h-screen min-h-screen bg-[#FAF9F6] text-[#0A0A0C] overflow-hidden select-text border-t border-[#0A0A0C]/10"
+      className="relative w-full h-[100dvh] min-h-[520px] overflow-hidden bg-[#FAF9F6] text-[#0A0A0C] select-text border-t border-[#0A0A0C]/10 flex items-center justify-center"
       style={{
         backgroundColor: "#FAF9F6", // Clean light neutral canvas matching 71Three
       }}
     >
       <div id="process" className="absolute -top-24 pointer-events-none" />
+      
       {/* Subtle Warm Canvas Vignette */}
       <div
         aria-hidden="true"
@@ -221,34 +239,34 @@ export default function GoodFit() {
       />
 
       {/* =================================================================== */}
-      {/* 1. OVERSIZED CENTERED HEADING (EXACTLY AS IN SCREENSHOT 1)          */}
+      {/* 1. OVERSIZED CENTERED HEADING (EXACTLY AS IN 71THREE)               */}
       {/* Centered in the screen; the cards stack directly in front of it!     */}
       {/* =================================================================== */}
       <div
         ref={headingRef}
-        className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none select-none px-6"
+        className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none select-none px-4 sm:px-6"
       >
-        <h2 className="font-sans text-[48px] sm:text-[72px] md:text-[92px] lg:text-[108px] xl:text-[116px] font-medium tracking-[-0.035em] text-[#0A0A0C] leading-none whitespace-nowrap text-center">
+        <h2 className="font-sans text-[34px] xs:text-[44px] sm:text-[68px] md:text-[88px] lg:text-[104px] xl:text-[116px] font-medium tracking-[-0.035em] text-[#0A0A0C] leading-[1.08] sm:leading-none sm:whitespace-nowrap text-center max-w-[94vw]">
           We're a good fit if…
         </h2>
       </div>
 
       {/* =================================================================== */}
-      {/* 2. CENTERED STACKING CARDS STAGE (DESKTOP & TABLET >= 768px)        */}
-      {/* Compact portrait cards advancing from the bottom into the foreground */}
+      {/* 2. CENTERED STACKING CARDS STAGE (MOBILE, TABLET & DESKTOP)         */}
+      {/* Scroll-driven physical card deck advancing into foreground          */}
       {/* =================================================================== */}
-      <div className="hidden md:flex absolute inset-0 z-10 items-center justify-center pointer-events-none">
-        <div className="relative w-[390px] sm:w-[420px] md:w-[440px] lg:w-[460px] h-[520px] sm:h-[540px] md:h-[560px] pointer-events-auto">
+      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none px-3 sm:px-4">
+        <div className="relative w-[min(330px,calc(100vw-2rem))] xs:w-[350px] sm:w-[400px] md:w-[440px] lg:w-[460px] h-[400px] xs:h-[430px] sm:h-[500px] md:h-[550px] lg:h-[560px] pointer-events-auto">
           
           {/* --------------------------------------------------------------- */}
           {/* CARD 1: "You care how your business is perceived."              */}
           {/* --------------------------------------------------------------- */}
           <div
             ref={card1Ref}
-            className="absolute inset-0 w-full h-full rounded-[36px] sm:rounded-[40px] bg-[#000000] text-white p-3.5 sm:p-4 flex flex-col justify-between border border-white/[0.14] shadow-[0_25px_60px_-10px_rgba(0,0,0,0.65),0_0_1px_1px_rgba(255,255,255,0.12)] will-change-transform origin-top"
+            className="absolute inset-0 w-full h-full rounded-[24px] xs:rounded-[28px] sm:rounded-[38px] md:rounded-[40px] bg-[#000000] text-white p-2.5 xs:p-3 sm:p-4 flex flex-col justify-between border border-white/[0.14] shadow-[0_25px_60px_-10px_rgba(0,0,0,0.65),0_0_1px_1px_rgba(255,255,255,0.12)] will-change-transform origin-top"
           >
             {/* Top Cropped Editorial Image */}
-            <div className="w-full h-[265px] sm:h-[285px] md:h-[300px] rounded-[24px] sm:rounded-[26px] overflow-hidden bg-black/50 border border-white/10 shrink-0">
+            <div className="w-full h-[170px] xs:h-[190px] sm:h-[250px] md:h-[290px] lg:h-[300px] rounded-[18px] xs:rounded-[20px] sm:rounded-[26px] overflow-hidden bg-black/50 border border-white/10 shrink-0">
               <img
                 src={fitCards[0].image}
                 alt={fitCards[0].imageAlt}
@@ -258,11 +276,11 @@ export default function GoodFit() {
             </div>
 
             {/* Bottom Statement & Supporting Copy */}
-            <div className="px-3 sm:px-4 pt-2.5 pb-4 sm:pb-5 flex-1 flex flex-col items-center justify-center text-center my-auto">
-              <h3 className="font-sans text-[21px] sm:text-[23px] md:text-[25px] font-medium text-white tracking-[-0.02em] leading-[1.28] text-center max-w-[340px]">
+            <div className="px-2 xs:px-3 sm:px-4 pt-1.5 xs:pt-2 pb-2 xs:pb-3 sm:pb-5 flex-1 flex flex-col items-center justify-center text-center my-auto">
+              <h3 className="font-sans text-[15px] xs:text-[17px] sm:text-[22px] md:text-[24px] lg:text-[25px] font-medium text-white tracking-[-0.02em] leading-[1.25] text-center max-w-[340px]">
                 {fitCards[0].statement}
               </h3>
-              <p className="font-sans text-[12.5px] sm:text-[13px] text-[#A2A1AC] font-light leading-[1.5] mt-2 text-center max-w-[340px]">
+              <p className="font-sans text-[11px] xs:text-[12px] sm:text-[13px] text-[#A2A1AC] font-light leading-[1.45] mt-1 xs:mt-1.5 text-center max-w-[340px]">
                 {fitCards[0].supporting}
               </p>
             </div>
@@ -273,10 +291,10 @@ export default function GoodFit() {
           {/* --------------------------------------------------------------- */}
           <div
             ref={card2Ref}
-            className="absolute inset-0 w-full h-full rounded-[36px] sm:rounded-[40px] bg-[#000000] text-white p-3.5 sm:p-4 flex flex-col justify-between border border-white/[0.14] shadow-[0_25px_60px_-10px_rgba(0,0,0,0.65),0_0_1px_1px_rgba(255,255,255,0.12)] will-change-transform origin-top"
+            className="absolute inset-0 w-full h-full rounded-[24px] xs:rounded-[28px] sm:rounded-[38px] md:rounded-[40px] bg-[#000000] text-white p-2.5 xs:p-3 sm:p-4 flex flex-col justify-between border border-white/[0.14] shadow-[0_25px_60px_-10px_rgba(0,0,0,0.65),0_0_1px_1px_rgba(255,255,255,0.12)] will-change-transform origin-top"
           >
             {/* Top Cropped Editorial Image */}
-            <div className="w-full h-[265px] sm:h-[285px] md:h-[300px] rounded-[24px] sm:rounded-[26px] overflow-hidden bg-black/50 border border-white/10 shrink-0">
+            <div className="w-full h-[170px] xs:h-[190px] sm:h-[250px] md:h-[290px] lg:h-[300px] rounded-[18px] xs:rounded-[20px] sm:rounded-[26px] overflow-hidden bg-black/50 border border-white/10 shrink-0">
               <img
                 src={fitCards[1].image}
                 alt={fitCards[1].imageAlt}
@@ -286,11 +304,11 @@ export default function GoodFit() {
             </div>
 
             {/* Bottom Statement & Supporting Copy */}
-            <div className="px-3 sm:px-4 pt-2.5 pb-4 sm:pb-5 flex-1 flex flex-col items-center justify-center text-center my-auto">
-              <h3 className="font-sans text-[21px] sm:text-[23px] md:text-[25px] font-medium text-white tracking-[-0.02em] leading-[1.28] text-center max-w-[340px]">
+            <div className="px-2 xs:px-3 sm:px-4 pt-1.5 xs:pt-2 pb-2 xs:pb-3 sm:pb-5 flex-1 flex flex-col items-center justify-center text-center my-auto">
+              <h3 className="font-sans text-[15px] xs:text-[17px] sm:text-[22px] md:text-[24px] lg:text-[25px] font-medium text-white tracking-[-0.02em] leading-[1.25] text-center max-w-[340px]">
                 {fitCards[1].statement}
               </h3>
-              <p className="font-sans text-[12.5px] sm:text-[13px] text-[#A2A1AC] font-light leading-[1.5] mt-2 text-center max-w-[340px]">
+              <p className="font-sans text-[11px] xs:text-[12px] sm:text-[13px] text-[#A2A1AC] font-light leading-[1.45] mt-1 xs:mt-1.5 text-center max-w-[340px]">
                 {fitCards[1].supporting}
               </p>
             </div>
@@ -301,10 +319,10 @@ export default function GoodFit() {
           {/* --------------------------------------------------------------- */}
           <div
             ref={card3Ref}
-            className="absolute inset-0 w-full h-full rounded-[36px] sm:rounded-[40px] bg-[#000000] text-white p-3.5 sm:p-4 flex flex-col justify-between border border-white/[0.14] shadow-[0_25px_60px_-10px_rgba(0,0,0,0.65),0_0_1px_1px_rgba(255,255,255,0.12)] will-change-transform origin-top"
+            className="absolute inset-0 w-full h-full rounded-[24px] xs:rounded-[28px] sm:rounded-[38px] md:rounded-[40px] bg-[#000000] text-white p-2.5 xs:p-3 sm:p-4 flex flex-col justify-between border border-white/[0.14] shadow-[0_25px_60px_-10px_rgba(0,0,0,0.65),0_0_1px_1px_rgba(255,255,255,0.12)] will-change-transform origin-top"
           >
             {/* Top Cropped Editorial Image */}
-            <div className="w-full h-[265px] sm:h-[285px] md:h-[300px] rounded-[24px] sm:rounded-[26px] overflow-hidden bg-black/50 border border-white/10 shrink-0">
+            <div className="w-full h-[170px] xs:h-[190px] sm:h-[250px] md:h-[290px] lg:h-[300px] rounded-[18px] xs:rounded-[20px] sm:rounded-[26px] overflow-hidden bg-black/50 border border-white/10 shrink-0">
               <img
                 src={fitCards[2].image}
                 alt={fitCards[2].imageAlt}
@@ -314,11 +332,11 @@ export default function GoodFit() {
             </div>
 
             {/* Bottom Statement & Supporting Copy */}
-            <div className="px-3 sm:px-4 pt-2.5 pb-4 sm:pb-5 flex-1 flex flex-col items-center justify-center text-center my-auto">
-              <h3 className="font-sans text-[21px] sm:text-[23px] md:text-[25px] font-medium text-white tracking-[-0.02em] leading-[1.28] text-center max-w-[340px]">
+            <div className="px-2 xs:px-3 sm:px-4 pt-1.5 xs:pt-2 pb-2 xs:pb-3 sm:pb-5 flex-1 flex flex-col items-center justify-center text-center my-auto">
+              <h3 className="font-sans text-[15px] xs:text-[17px] sm:text-[22px] md:text-[24px] lg:text-[25px] font-medium text-white tracking-[-0.02em] leading-[1.25] text-center max-w-[340px]">
                 {fitCards[2].statement}
               </h3>
-              <p className="font-sans text-[12.5px] sm:text-[13px] text-[#A2A1AC] font-light leading-[1.5] mt-2 text-center max-w-[340px]">
+              <p className="font-sans text-[11px] xs:text-[12px] sm:text-[13px] text-[#A2A1AC] font-light leading-[1.45] mt-1 xs:mt-1.5 text-center max-w-[340px]">
                 {fitCards[2].supporting}
               </p>
             </div>
@@ -326,44 +344,6 @@ export default function GoodFit() {
 
         </div>
       </div>
-
-      {/* =================================================================== */}
-      {/* 3. MOBILE FALLBACK (< 768px): Vertical flowing stack                */}
-      {/* =================================================================== */}
-      <div className="md:hidden relative z-10 w-full px-5 py-16 flex flex-col items-center">
-        <div className="text-center mb-10">
-          <h2 className="font-sans text-[34px] font-medium tracking-tight text-[#0A0A0C]">
-            We're a good fit if…
-          </h2>
-        </div>
-
-        <div className="w-full max-w-[360px] space-y-6">
-          {fitCards.map((card) => (
-            <div
-              key={card.id}
-              className="w-full rounded-[32px] bg-[#000000] text-white p-3.5 border border-white/[0.12] shadow-xl flex flex-col"
-            >
-              <div className="w-full aspect-[4/3] rounded-[22px] overflow-hidden bg-black/50 border border-white/10 mb-3">
-                <img
-                  src={card.image}
-                  alt={card.imageAlt}
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: card.imagePosition }}
-                />
-              </div>
-              <div className="px-2 pb-3 text-center">
-                <h3 className="font-sans text-[19px] font-medium text-white tracking-tight leading-snug">
-                  {card.statement}
-                </h3>
-                <p className="font-sans text-[12.5px] text-[#A2A1AC] font-light leading-relaxed mt-1.5 max-w-[300px] mx-auto">
-                  {card.supporting}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </section>
   );
 }
-

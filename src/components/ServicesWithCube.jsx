@@ -485,13 +485,29 @@ export default function ServicesWithCube() {
 
     const mm = gsap.matchMedia();
 
-    // Desktop & Tablet (>= 768px): Pinned Horizontal Scroll with Dynamic Spotlight Color Change
-    mm.add("(min-width: 768px)", () => {
+    // Reusable factory for the scroll-driven pinned horizontal translation
+    const setupHorizontalScrollAnimation = ({
+      scrubSpeed,
+      extraPad,
+      bufferEnd,
+      colorStart,
+      colorEnd,
+      vanishStart,
+      vanishEnd,
+      crossfadeStart,
+      crossfadeEnd,
+    }) => {
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReduced) {
+        gsap.set(track, { clearProps: "all" });
+        return;
+      }
+
       const getScrollShift = () => {
         const container = track.parentElement;
         if (!container) return 0;
         // Shift so Card 06 lands comfortably in full view in the spotlight area:
-        const maxShift = track.scrollWidth - container.clientWidth + 48;
+        const maxShift = track.scrollWidth - container.clientWidth + extraPad;
         return Math.max(0, maxShift);
       };
 
@@ -499,9 +515,9 @@ export default function ServicesWithCube() {
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: () => `+=${getScrollShift() + 100}`,
+          end: () => `+=${getScrollShift() + bufferEnd}`,
           pin: true,
-          scrub: 1.1,
+          scrub: scrubSpeed,
           invalidateOnRefresh: true,
           anticipatePin: 1,
         },
@@ -535,8 +551,8 @@ export default function ServicesWithCube() {
               scrollTrigger: {
                 trigger: card,
                 containerAnimation: tl,
-                start: "left 74%",
-                end: "left 46%",
+                start: colorStart,
+                end: colorEnd,
                 scrub: true,
               },
             }
@@ -554,8 +570,8 @@ export default function ServicesWithCube() {
             scrollTrigger: {
               trigger: card,
               containerAnimation: tl,
-              start: "left 36%",
-              end: "left 15%",
+              start: vanishStart,
+              end: vanishEnd,
               scrub: true,
             },
           });
@@ -581,8 +597,8 @@ export default function ServicesWithCube() {
             scrollTrigger: {
               trigger: card4,
               containerAnimation: tl,
-              start: "left 90%",
-              end: "left 45%",
+              start: crossfadeStart,
+              end: crossfadeEnd,
               scrub: true,
               onUpdate: (self) => {
                 if (cubeWrapRef.current) {
@@ -605,8 +621,8 @@ export default function ServicesWithCube() {
             scrollTrigger: {
               trigger: card4,
               containerAnimation: tl,
-              start: "left 90%",
-              end: "left 45%",
+              start: crossfadeStart,
+              end: crossfadeEnd,
               scrub: true,
               onUpdate: (self) => {
                 if (codeSymbolWrapRef.current) {
@@ -620,35 +636,51 @@ export default function ServicesWithCube() {
       }
 
       ScrollTrigger.refresh();
+    };
+
+    // Desktop (>= 1024px): Full desktop horizontal travel and depth
+    mm.add("(min-width: 1024px)", () => {
+      setupHorizontalScrollAnimation({
+        scrubSpeed: 1.1,
+        extraPad: 48,
+        bufferEnd: 100,
+        colorStart: "left 74%",
+        colorEnd: "left 46%",
+        vanishStart: "left 36%",
+        vanishEnd: "left 15%",
+        crossfadeStart: "left 90%",
+        crossfadeEnd: "left 45%",
+      });
     });
 
-    // Mobile (< 768px): Touch-friendly swipe without pinned traps
+    // Tablet (768px - 1023px): Smooth tablet scroll travel
+    mm.add("(min-width: 768px) and (max-width: 1023px)", () => {
+      setupHorizontalScrollAnimation({
+        scrubSpeed: 1.0,
+        extraPad: 36,
+        bufferEnd: 80,
+        colorStart: "left 85%",
+        colorEnd: "left 35%",
+        vanishStart: "right 35%",
+        vanishEnd: "right 5%",
+        crossfadeStart: "left 90%",
+        crossfadeEnd: "left 50%",
+      });
+    });
+
+    // Mobile (< 768px): Calibrated tactile scroll travel for phones
     mm.add("(max-width: 767px)", () => {
-      gsap.set(track, { clearProps: "all" });
-
-      const handleMobileScroll = () => {
-        if (!track) return;
-        const scrollLeft = track.scrollLeft;
-        const cardWidth = 320;
-        const activeIdx = Math.min(5, Math.max(0, Math.round(scrollLeft / cardWidth)));
-        // active index handled directly below
-
-        if (!cubeWrapRef.current || !codeSymbolWrapRef.current) return;
-        if (activeIdx >= 3) {
-          cubeWrapRef.current.style.opacity = "0";
-          cubeWrapRef.current.style.pointerEvents = "none";
-          codeSymbolWrapRef.current.style.opacity = "1";
-          codeSymbolWrapRef.current.style.pointerEvents = "auto";
-        } else {
-          cubeWrapRef.current.style.opacity = "1";
-          cubeWrapRef.current.style.pointerEvents = "auto";
-          codeSymbolWrapRef.current.style.opacity = "0";
-          codeSymbolWrapRef.current.style.pointerEvents = "none";
-        }
-      };
-
-      track.addEventListener("scroll", handleMobileScroll, { passive: true });
-      return () => track.removeEventListener("scroll", handleMobileScroll);
+      setupHorizontalScrollAnimation({
+        scrubSpeed: 0.85,
+        extraPad: 24,
+        bufferEnd: 60,
+        colorStart: "left 95%",
+        colorEnd: "left 35%",
+        vanishStart: "right 28%",
+        vanishEnd: "right 0%",
+        crossfadeStart: "left 95%",
+        crossfadeEnd: "left 45%",
+      });
     });
 
     return () => {
@@ -660,7 +692,7 @@ export default function ServicesWithCube() {
     <section
       id="services"
       ref={sectionRef}
-      className="relative w-full min-h-screen md:h-screen flex flex-col justify-center overflow-hidden select-text py-16 md:py-0"
+      className="relative w-full h-[100dvh] min-h-[560px] flex flex-col justify-center overflow-hidden select-text py-2 sm:py-4 lg:py-0"
       style={{
         backgroundColor: "#050508",
         color: "#F5F4FF",
@@ -676,18 +708,18 @@ export default function ServicesWithCube() {
         }}
       />
 
-      <div className="w-full h-full max-w-[1720px] mx-auto flex flex-col lg:flex-row items-center px-6 sm:px-10 lg:px-12 relative z-10">
+      <div className="w-full h-full max-w-[1720px] mx-auto flex flex-col lg:flex-row items-center px-4 sm:px-8 lg:px-12 relative z-10">
 
         {/* ========================================================= */}
         {/* 1. LEFT ZONE: DEDICATED 3D PARTICLE VISUAL CENTERPIECE    */}
         {/* Services 1–3: ParticleCube | Services 4–6: ParticleCodeSymbol */}
         {/* ========================================================= */}
-        <div className="w-full lg:w-[38vw] lg:min-w-[400px] h-[300px] sm:h-[360px] lg:h-full flex items-center justify-center shrink-0 relative pt-4 sm:pt-8 lg:pt-20 z-20">
+        <div className="w-full lg:w-[38vw] lg:min-w-[400px] h-[95px] xs:h-[115px] sm:h-[155px] lg:h-full flex items-center justify-center shrink-0 relative pt-1 sm:pt-2 lg:pt-20 z-20">
           <div className="group relative flex items-center justify-center cursor-default">
             {/* Atmospheric Violet Glow behind 3D Particle Visual */}
             <div
               aria-hidden="true"
-              className="absolute w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] lg:w-[460px] lg:h-[460px] rounded-full blur-[100px] opacity-40 select-none pointer-events-none transition-opacity duration-700 ease-out group-hover:opacity-60"
+              className="absolute w-[110px] h-[110px] xs:w-[130px] xs:h-[130px] sm:w-[190px] sm:h-[190px] lg:w-[460px] lg:h-[460px] rounded-full blur-[35px] xs:blur-[45px] sm:blur-[70px] lg:blur-[100px] opacity-40 select-none pointer-events-none transition-opacity duration-700 ease-out group-hover:opacity-60"
               style={{
                 background:
                   "radial-gradient(circle, #5848FF 0%, #221A65 45%, transparent 70%)",
@@ -695,7 +727,7 @@ export default function ServicesWithCube() {
             />
 
             {/* Shared Visual Container: Seamless crossfade between Cube and Code Symbol */}
-            <div className="w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] lg:w-[440px] lg:h-[440px] aspect-square flex items-center justify-center relative z-10">
+            <div className="w-[85px] h-[85px] xs:w-[105px] xs:h-[105px] sm:w-[145px] sm:h-[145px] lg:w-[440px] lg:h-[440px] aspect-square flex items-center justify-center relative z-10">
 
               {/* Visual 1: 3D Particle Cube (Services 1–3) */}
               <div
@@ -722,43 +754,43 @@ export default function ServicesWithCube() {
         {/* ========================================================= */}
         {/* 2. RIGHT ZONE: HEADER + STANDARDIZED CARDS TRACK          */}
         {/* ========================================================= */}
-        <div className="flex-1 w-full h-full min-w-0 flex flex-col justify-between pt-8 sm:pt-12 lg:pt-28 pb-5 sm:pb-7 lg:pb-8 pl-0 lg:pl-4 relative">
+        <div className="flex-1 w-full min-h-0 lg:h-full min-w-0 flex flex-col justify-between pt-1 xs:pt-2 sm:pt-4 lg:pt-24 pb-2 xs:pb-3 sm:pb-5 lg:pb-8 pl-0 lg:pl-4 relative">
 
           {/* Top Section Header */}
-          <div className="w-full flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6 pb-4 sm:pb-5 lg:pb-7 border-b border-white/10">
+          <div className="w-full flex flex-col sm:flex-row sm:items-start justify-between gap-1.5 xs:gap-2 sm:gap-4 lg:gap-6 pb-2 xs:pb-2.5 sm:pb-4 lg:pb-7 border-b border-white/10 shrink-0">
             <div>
-              <h2 className="font-sans text-[32px] sm:text-[42px] lg:text-[48px] font-semibold text-white tracking-tight leading-none">
+              <h2 className="font-sans text-[20px] xs:text-[24px] sm:text-[32px] lg:text-[48px] font-semibold text-white tracking-tight leading-none">
                 Our Services
               </h2>
             </div>
 
             <div className="max-w-[420px]">
-              <p className="font-sans text-[13px] sm:text-[14px] text-[#A1A0B5] font-normal leading-[1.6]">
+              <p className="font-sans text-[11px] xs:text-[12px] sm:text-[13.5px] text-[#A1A0B5] font-normal leading-[1.45] line-clamp-2 sm:line-clamp-none">
                 We build scalable digital platforms, modern intelligent systems, and connected products that solve tangible problems and accelerate business value.
               </p>
             </div>
           </div>
 
-          {/* Cards Track Container with Left-Edge Dissolve Mask on Desktop */}
+          {/* Cards Track Container with Left-Edge Dissolve Mask */}
           <div
-            className="w-full my-auto py-3 overflow-x-auto sm:overflow-visible no-scrollbar snap-x snap-mandatory md:snap-none"
+            className="w-full my-auto py-1 xs:py-2 sm:py-3 overflow-hidden no-scrollbar"
             style={{
               WebkitMaskImage:
-                "linear-gradient(to right, transparent 0%, black 60px, black calc(100% - 40px), transparent 100%)",
+                "linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%)",
               maskImage:
-                "linear-gradient(to right, transparent 0%, black 60px, black calc(100% - 40px), transparent 100%)",
+                "linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 16px), transparent 100%)",
             }}
           >
             <div
               ref={trackRef}
-              className="flex gap-5 sm:gap-6 lg:gap-7 items-stretch min-w-max pl-4 sm:pl-8 pr-12 sm:pr-24 will-change-transform"
+              className="flex gap-3 xs:gap-4 sm:gap-6 lg:gap-7 items-stretch min-w-max pl-4 sm:pl-8 pr-10 sm:pr-24 will-change-transform"
             >
               {servicesData.map((service, index) => {
                 return (
                   <div
                     key={service.num}
                     ref={(el) => (cardsRef.current[index] = el)}
-                    className="service-card group relative w-[310px] sm:w-[350px] lg:w-[380px] h-[500px] sm:h-[520px] lg:h-[540px] rounded-[28px] border p-6 sm:p-7 lg:p-8 flex flex-col shrink-0 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(55,53,109,0.35)] will-change-transform text-white overflow-hidden snap-center"
+                    className="service-card group relative w-[min(280px,calc(100vw-2.5rem))] xs:w-[305px] sm:w-[340px] lg:w-[380px] h-[315px] xs:h-[340px] sm:h-[420px] lg:h-[540px] rounded-[20px] xs:rounded-[24px] sm:rounded-[28px] border p-3.5 xs:p-4.5 sm:p-7 lg:p-8 flex flex-col shrink-0 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(55,53,109,0.35)] will-change-transform text-white overflow-hidden"
                     style={{
                       backgroundColor: service.initialBg,
                       borderColor: service.initialBorder,
@@ -771,45 +803,45 @@ export default function ServicesWithCube() {
                     </div>
 
                     {/* 1. TOP: Service Number (01–06) and Arrow Icon */}
-                    <div className="relative z-10 flex items-center justify-between w-full h-10 shrink-0">
-                      <span className="font-sans text-[26px] sm:text-[28px] lg:text-[30px] font-semibold text-white/90 tracking-tight leading-none">
+                    <div className="relative z-10 flex items-center justify-between w-full h-8 xs:h-9 sm:h-10 shrink-0">
+                      <span className="font-sans text-[22px] xs:text-[25px] sm:text-[28px] lg:text-[30px] font-semibold text-white/90 tracking-tight leading-none">
                         {service.num}
                       </span>
                       <a
                         href="#contact"
                         aria-label={`Inquire about ${service.title}`}
-                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 group-hover:bg-[#8E83FF] flex items-center justify-center text-[15px] sm:text-[16px] font-medium text-white transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 border border-white/10 group-hover:border-transparent"
+                        className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 group-hover:bg-[#8E83FF] flex items-center justify-center text-[14px] xs:text-[15px] sm:text-[16px] font-medium text-white transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 border border-white/10 group-hover:border-transparent"
                       >
                         ↗
                       </a>
                     </div>
 
                     {/* 2 & 3. MIDDLE: Service Title and Concise Description */}
-                    <div className="relative z-10 flex-1 flex flex-col justify-start pt-4 sm:pt-5 pb-3">
-                      <h3 className="font-sans text-[21px] sm:text-[22px] lg:text-[24px] font-semibold text-white tracking-tight leading-[1.25] min-h-[52px] sm:min-h-[56px] lg:min-h-[60px] flex items-start">
+                    <div className="relative z-10 flex-1 flex flex-col justify-start pt-2 xs:pt-3 sm:pt-5 pb-1 xs:pb-2">
+                      <h3 className="font-sans text-[16px] xs:text-[18px] sm:text-[21px] lg:text-[24px] font-semibold text-white tracking-tight leading-[1.2] min-h-[38px] xs:min-h-[44px] sm:min-h-[54px] lg:min-h-[60px] flex items-start">
                         {service.title}
                       </h3>
-                      <p className="font-sans text-[13px] sm:text-[13.5px] text-white/80 font-normal leading-[1.6] mt-2.5 sm:mt-3 line-clamp-3">
+                      <p className="font-sans text-[11px] xs:text-[12px] sm:text-[13px] lg:text-[13.5px] text-white/80 font-normal leading-[1.45] mt-1.5 xs:mt-2 sm:mt-3 line-clamp-2 xs:line-clamp-3">
                         {service.desc}
                       </p>
                     </div>
 
                     {/* 4 & 5. LOWER: Divider & Labeled Technology Stack Row (Fixed Baseline Across All Cards) */}
-                    <div className="relative z-10 w-full shrink-0 h-[148px] sm:h-[152px] lg:h-[156px] pt-3.5 sm:pt-4 border-t border-white/15 flex flex-col justify-start">
-                      <span className="block font-sans text-[10.5px] sm:text-[11px] font-mono uppercase tracking-[0.14em] text-[#C7C0FF]/80 mb-2 sm:mb-2.5">
+                    <div className="relative z-10 w-full shrink-0 h-[105px] xs:h-[120px] sm:h-[145px] lg:h-[156px] pt-2 xs:pt-2.5 sm:pt-4 border-t border-white/15 flex flex-col justify-start">
+                      <span className="block font-sans text-[9.5px] xs:text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.14em] text-[#C7C0FF]/80 mb-1 xs:mb-1.5 sm:mb-2.5">
                         Core Tech Stack
                       </span>
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap content-start">
+                      <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 flex-wrap content-start">
                         {service.techStack.map((tech) => (
                           <div
                             key={tech.name}
-                            className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white/8 hover:bg-white/15 border border-white/10 transition-colors"
+                            className="inline-flex items-center gap-1 xs:gap-1.5 px-1.5 py-0.5 xs:px-2 xs:py-1 sm:px-2.5 sm:py-1.5 rounded-md xs:rounded-lg bg-white/8 hover:bg-white/15 border border-white/10 transition-colors"
                             title={tech.name}
                           >
-                            <span className="shrink-0 flex items-center justify-center">
+                            <span className="shrink-0 flex items-center justify-center scale-90 xs:scale-100">
                               {tech.icon}
                             </span>
-                            <span className="font-sans text-[10.5px] sm:text-[11.5px] font-medium text-white/90 whitespace-nowrap">
+                            <span className="font-sans text-[9.5px] xs:text-[10px] sm:text-[11.5px] font-medium text-white/90 whitespace-nowrap">
                               {tech.name}
                             </span>
                           </div>
@@ -823,9 +855,9 @@ export default function ServicesWithCube() {
           </div>
 
           {/* Bottom Footer Info Bar */}
-          <div className="w-full flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.18em] text-[#8E8E9F]/60 pt-3 border-t border-white/10">
-            <span className="hidden sm:inline">SCROLL TO NAVIGATE ALL SERVICES</span>
-            <span>06 CAPABILITIES</span>
+          <div className="w-full flex items-center justify-between text-[9.5px] xs:text-[10.5px] sm:text-[11px] font-mono uppercase tracking-[0.16em] text-[#8E8E9F]/60 pt-1.5 xs:pt-2 sm:pt-3 border-t border-white/10 shrink-0">
+            <span className="inline font-mono">SCROLL TO NAVIGATE ALL SERVICES (01–06)</span>
+            <span className="hidden sm:inline">TAVQO DIGITAL PLATFORMS</span>
           </div>
 
         </div>

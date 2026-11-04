@@ -531,7 +531,7 @@ export default function Contact() {
               {/* Main Transparent Glass Panel */}
               <div
                 ref={formPanelRef}
-                className="relative rounded-[28px] sm:rounded-[32px] lg:rounded-[36px] bg-white/[0.025] backdrop-blur-2xl border border-white/10 hover:border-[#8275FF]/30 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] p-7 sm:p-10 lg:p-12 xl:p-14 overflow-hidden transition-colors"
+                className="relative rounded-[24px] sm:rounded-[32px] lg:rounded-[36px] bg-white/[0.025] backdrop-blur-2xl border border-white/10 hover:border-[#8275FF]/30 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] p-5 sm:p-8 lg:p-12 xl:p-14 overflow-hidden transition-colors"
                 style={{ "--border-x": "50%" }}
               >
                 {/* Precision interactive top edge violet accent light beam tracking mouse */}

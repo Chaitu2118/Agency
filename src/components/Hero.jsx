@@ -311,7 +311,7 @@ export default function Hero({ isRevealed = true }) {
         {/* Particle sphere container: Compact 1:1 ~420px apparent diameter on desktop */}
         <div
           ref={sphereWrapperRef}
-          className="w-[420px] h-[420px] sm:w-[460px] sm:h-[460px] lg:w-[500px] lg:h-[500px] aspect-square flex items-center justify-center pointer-events-auto will-change-transform"
+          className="w-[min(84vw,380px)] h-[min(84vw,380px)] sm:w-[460px] sm:h-[460px] lg:w-[500px] lg:h-[500px] aspect-square flex items-center justify-center pointer-events-auto will-change-transform"
         >
           <ParticleSphere
             className="w-full h-full aspect-square"
@@ -339,7 +339,7 @@ export default function Hero({ isRevealed = true }) {
       {/* ========================================================= */}
       <div className="relative z-10 w-full max-w-[780px] mx-auto flex-grow flex flex-col items-center justify-center text-center my-auto pt-4 pb-2">
         <div className="hero-headline-wrap max-w-[760px] mx-auto">
-          <h1 className="font-sans text-[44px] sm:text-[56px] md:text-[66px] lg:text-[74px] font-light tracking-[-0.035em] leading-[1.08] text-white select-none">
+          <h1 className="font-sans text-[34px] xs:text-[42px] sm:text-[54px] md:text-[66px] lg:text-[74px] font-light tracking-[-0.035em] leading-[1.1] sm:leading-[1.08] text-white select-none">
             <div className="block">
               <span
                 className="font-light"
@@ -411,8 +411,8 @@ export default function Hero({ isRevealed = true }) {
           </div>
         </div>
 
-        {/* LOWER-RIGHT: Three Core Studio Pillars (Side-by-side layout) */}
-        <div className="hero-metrics-wrap flex items-center gap-3 sm:gap-4 lg:gap-6 self-stretch md:self-end justify-between md:justify-end">
+        {/* LOWER-RIGHT: Three Core Studio Pillars (Side-by-side on desktop, clean wrap on mobile) */}
+        <div className="hero-metrics-wrap flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-4 lg:gap-6 self-stretch md:self-end justify-start sm:justify-end">
           {/* Metric 1 */}
           <div className="hero-metric-item flex items-center">
             <span className="text-[12px] sm:text-[13px] lg:text-[13.5px] font-sans font-medium text-white/90 leading-tight tracking-[-0.01em]">
@@ -421,7 +421,7 @@ export default function Hero({ isRevealed = true }) {
           </div>
 
           {/* Divider 1 */}
-          <div className="h-4 sm:h-5 w-[1px] bg-white/20 shrink-0 mx-1 sm:mx-2 lg:mx-3 hidden sm:block" />
+          <div className="h-3.5 sm:h-5 w-[1px] bg-white/20 shrink-0 mx-0.5 sm:mx-2 lg:mx-3" />
 
           {/* Metric 2 */}
           <div className="hero-metric-item flex items-center">
@@ -431,7 +431,7 @@ export default function Hero({ isRevealed = true }) {
           </div>
 
           {/* Divider 2 */}
-          <div className="h-4 sm:h-5 w-[1px] bg-white/20 shrink-0 mx-1 sm:mx-2 lg:mx-3 hidden sm:block" />
+          <div className="h-3.5 sm:h-5 w-[1px] bg-white/20 shrink-0 mx-0.5 sm:mx-2 lg:mx-3" />
 
           {/* Metric 3 */}
           <div className="hero-metric-item flex items-center">

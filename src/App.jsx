@@ -1,6 +1,7 @@
 import { useEffect, useRef, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Lenis from "lenis";
+import { Navigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navbar from "./components/Navbar";
@@ -11,6 +12,7 @@ import ValuePropositionTrail from "./components/ValuePropositionTrail";
 import GoodFit from "./components/GoodFit";
 import Footer from "./components/Footer";
 
+import SEO from "./components/SEO";
 // Lazy-load secondary pages for optimal initial route performance
 const About = lazy(() => import("./pages/About"));
 const ServicesPage = lazy(() => import("./pages/Services"));
@@ -18,6 +20,7 @@ const Contact = lazy(() => import("./pages/Contact"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Disclaimer = lazy(() => import("./pages/Disclaimer"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -96,22 +99,63 @@ function HomePage() {
   );
 }
 
+
 export default function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<div className="min-h-screen bg-[#050508]" />}>
+      <SEO />
+
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-[#050508]" />
+        }
+      >
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/terms-of-service" element={<Terms />} />
-          <Route path="/terms-and-conditions" element={<Terms />} />
-          <Route path="/disclaimer" element={<Disclaimer />} />
-          <Route path="*" element={<HomePage />} />
+
+          <Route
+            path="/privacy-policy"
+            element={<PrivacyPolicy />}
+          />
+
+          <Route
+            path="/terms-and-conditions"
+            element={<Terms />}
+          />
+
+          <Route
+            path="/disclaimer"
+            element={<Disclaimer />}
+          />
+
+          {/* Redirect old URLs to one canonical URL */}
+          <Route
+            path="/privacy"
+            element={<Navigate to="/privacy-policy" replace />}
+          />
+
+          <Route
+            path="/terms"
+            element={<Navigate to="/terms-and-conditions" replace />}
+          />
+
+          <Route
+            path="/terms-of-service"
+            element={<Navigate to="/terms-and-conditions" replace />}
+          />
+
+          {/* Real 404 instead of displaying Home on invalid URLs */}
+          <Route
+            path="/404"
+            element={<NotFound />}
+          />
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
         </Routes>
       </Suspense>
     </BrowserRouter>
