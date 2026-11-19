@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -23,11 +24,13 @@ export default function Navbar({
   onNavigate,
   currentRoute = "home",
 }) {
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
   const isAbout = currentRoute === "about" || pathname.startsWith("/about");
   const isServices = currentRoute === "services" || pathname.startsWith("/services");
   const isContact = currentRoute === "contact" || pathname.startsWith("/contact");
-  const isMultiPage = isAbout || isServices || isContact;
+  const isMultiPage = isAbout || isServices || isContact || pathname !== "/";
 
   const [activeHref, setActiveHref] = useState(() => {
     if (isContact) return "/contact";
@@ -43,60 +46,54 @@ export default function Navbar({
 
     // If navigating to /contact
     if (link.href === "/contact" || link.pageHref === "/contact" || link.label === "Contact") {
-      if (typeof window !== "undefined") {
-        if (window.location.pathname === "/contact") {
-          e.preventDefault();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        } else {
-          window.location.href = "/contact";
-        }
+      e.preventDefault();
+      if (pathname === "/contact") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/contact");
+        window.scrollTo({ top: 0, behavior: "instant" });
       }
       return;
     }
 
     // If navigating to /about
     if (link.href === "/about" || link.pageHref === "/about" || link.label === "About") {
-      if (typeof window !== "undefined") {
-        if (window.location.pathname === "/about") {
-          e.preventDefault();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        } else {
-          window.location.href = "/about";
-        }
+      e.preventDefault();
+      if (pathname === "/about") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/about");
+        window.scrollTo({ top: 0, behavior: "instant" });
       }
       return;
     }
 
     // If navigating to /services
     if (link.href === "/services" || link.pageHref === "/services" || link.label === "Services") {
-      if (typeof window !== "undefined") {
-        if (window.location.pathname === "/services") {
-          e.preventDefault();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        } else {
-          window.location.href = "/services";
-        }
+      e.preventDefault();
+      if (pathname === "/services") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/services");
+        window.scrollTo({ top: 0, behavior: "instant" });
       }
       return;
     }
 
-    // If currently on a subpage (/about, /services, /contact)
+    // If currently on a subpage (/about, /services, /contact, etc.)
     if (isMultiPage) {
-      if (link.label === "Home") {
-        window.location.href = "/";
+      e.preventDefault();
+      if (link.label === "Home" || link.href === "#hero" || link.pageHref === "/") {
+        navigate("/");
+        window.scrollTo({ top: 0, behavior: "instant" });
         return;
       }
       if (link.href.startsWith("#")) {
-        const localEl = document.querySelector(link.href);
-        if (localEl) {
-          e.preventDefault();
-          localEl.scrollIntoView({ behavior: "smooth" });
-          return;
-        }
-        window.location.href = `/${link.href}`;
+        navigate(`/${link.href}`);
         return;
       }
-      window.location.href = link.pageHref || link.href;
+      navigate(link.pageHref || link.href);
+      window.scrollTo({ top: 0, behavior: "instant" });
       return;
     }
 
@@ -113,26 +110,34 @@ export default function Navbar({
         }
       }
     } else {
-      window.location.href = link.href;
+      e.preventDefault();
+      navigate(link.href);
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 
   const handleLogoClick = (e) => {
-    if (isMultiPage) {
-      e.preventDefault();
-      window.location.href = "/";
+    e.preventDefault();
+    if (pathname !== "/") {
+      navigate("/");
+      window.scrollTo({ top: 0, behavior: "instant" });
     } else {
-      handleNavClick(e, { label: "Home", href: "#hero", pageHref: "/" });
+      if (onNavigate) {
+        onNavigate("#hero");
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      setActiveHref("#hero");
     }
   };
 
   const handleCtaClick = (e) => {
-    if (isContact) {
-      e.preventDefault();
+    e.preventDefault();
+    if (pathname === "/contact") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      e.preventDefault();
-      window.location.href = "/contact";
+      navigate("/contact");
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 

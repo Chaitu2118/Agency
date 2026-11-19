@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "react";
-import { initFluid } from "smokey-fluid-cursor";
+import { initFluid } from "./fluidCursor";
 
 /**
- * TAVQO Aura Cursor — Subtle Deep-Indigo Fluid Simulation
+ * TAVQO Aura Cursor — Full-Bodied Deep-Indigo Fluid Simulation
  *
- * Muted, dark indigo tones matching the #050508 & #11112C background canvas.
- * Restrained intensity ensures the fluid remains subtle and smoky without over-shining.
+ * Restores the complete original aesthetic, fluid momentum, vorticity, and palette,
+ * using the optimized native WebGL engine which eliminates initial (0,0) jump streaks
+ * and hardcoded magenta highlighting bursts on page load.
  */
 const TAVQO_FLUID_PALETTE = [
   "#382AD8", // Deep indigo atmospheric tone
@@ -55,21 +56,21 @@ export default function AuraCursor({
         container,
         position: "absolute",
         simResolution: 128,
-        dyeResolution: 1024,
-        densityDissipation: 3.8, // Balanced dissipation allows smoke to swirl and drift gracefully
-        velocityDissipation: 2.2, // Fluid velocity carries the animation with natural momentum
+        dyeResolution: 1024, // Original crisp, high-definition resolution
+        densityDissipation: 3.8, // Original balanced dissipation for expressive smoke curls
+        velocityDissipation: 2.2, // Original fluid velocity carrying natural momentum
         pressure: 0.1,
         pressureIteration: 22,
-        curl: 28, // Expressive vorticity confinement for pronounced curls & eddies
-        splatRadius: 0.16, // Increased size for a prominent, fluid silhouette
-        splatForce: 3800, // Dynamic fluid momentum
+        curl: 28, // Original expressive vorticity confinement
+        splatRadius: 0.16, // Original prominent fluid silhouette size
+        splatForce: 3800, // Original dynamic fluid momentum
         shading: true,
         colorUpdateSpeed: 12,
         paused: false,
         transparent: true,
         backColor: { r: 0, g: 0, b: 0 },
         palette: TAVQO_FLUID_PALETTE,
-        colorIntensity: 0.20, // Subdued, soft background-matched intensity
+        colorIntensity: 0.20, // Original rich atmospheric intensity
         pointerEvents: false,
         zIndex: 4,
         maxDpr: 2,
